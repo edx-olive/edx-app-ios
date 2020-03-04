@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import <XCTest/XCTest.h>
-#import "OCMock.h"
+#import <OCMock/OCMock.h>
 
 #import "OEXAccessToken.h"
 #import "OEXMockCredentialStorage.h"
@@ -139,8 +139,8 @@
 
     [[self.provider expect] sessionEnded];
 
-//    FIXME:- Uncomment this code when we do have a push notification provider
-//    [self.session closeAndClearSession];
+    [self.session closeAndClearSession];
+//FIXME:- Uncomment this code when we do have a push notification provider
 //    OCMVerifyAll(self.provider);
 }
 

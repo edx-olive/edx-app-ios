@@ -17,8 +17,7 @@
 #import "OEXFacebookAuthProvider.h"
 #import "OEXGoogleAuthProvider.h"
 
-static CGFloat OEXExternalAuthButtonAspectRatio = 3.3;
-static CGFloat rowHeight = 30;
+static CGFloat OEXExternalAuthButtonAspectRatio = 3.4;
 
 @interface OEXExternalAuthOptionsView ()
 
@@ -28,12 +27,11 @@ static CGFloat rowHeight = 30;
 
 @implementation OEXExternalAuthOptionsView
 
-- (id)initWithFrame:(CGRect)frame providers:(nonnull NSArray *)providers accessibilityLabel:(NSString*)accessibilityLabel tapAction:(void(^)(id<OEXExternalAuthProvider>))tapAction {
-    
+- (id)initWithFrame:(CGRect)frame providers:(nonnull NSArray *)providers tapAction:(void(^)(id<OEXExternalAuthProvider>))tapAction {
     self = [super initWithFrame:frame];
     if(self != nil) {
         
-        self.rowSpacing = [[OEXStyles sharedStyles] standardVerticalMargin] + 5;
+        self.rowSpacing = [[OEXStyles sharedStyles] standardVerticalMargin];
         self.optionButtons = [providers oex_map:^id(id <OEXExternalAuthProvider> provider) {
             self.itemsPerRow += 1;
             UIButton* button = [provider freshAuthButton];
@@ -43,20 +41,21 @@ static CGFloat rowHeight = 30;
             else if ([provider isKindOfClass:[OEXGoogleAuthProvider class]]) {
                 button.accessibilityIdentifier = @"ExternalAuthOptionsView:google-button";
             }
-            button.accessibilityLabel = [NSString stringWithFormat:@"%@ %@",accessibilityLabel,button.titleLabel.text];
+            button.accessibilityLabel = [NSString stringWithFormat:@"%@ %@",[Strings registrationRegisterPrompt],button.titleLabel.text];
             [button oex_addAction:^(id  _Nonnull control) {
                 tapAction(provider);
             } forEvents:UIControlEventTouchUpInside];
             [self addSubview:button];
-            // We made adjustsFontSizeToFitWidth as true to fix the dynamic type text
-            [button.titleLabel setAdjustsFontSizeToFitWidth:true];
             return button;
         }];
         
-        if (self.itemsPerRow <= 1 )
+        if (self.itemsPerRow <= 1 ){
             self.itemsPerRow = 1;
+        } else {
+            self.itemsPerRow = 2;
+        }
+        
     }
-
     return self;
 
 }
@@ -66,10 +65,11 @@ static CGFloat rowHeight = 30;
         return CGSizeMake(UIViewNoIntrinsicMetric, 0);
     }
     else {
-        CGFloat width = [self itemWidthWithHeight:rowHeight];
-        float itemInRow = self.bounds.size.width / width  ;
-        NSUInteger rows = ceil(((float)self.optionButtons.count) /(float) itemInRow);
-        return CGSizeMake(self.bounds.size.width, rows * rowHeight + self.rowSpacing * (rows - 1));
+        CGFloat height = 30;
+        NSUInteger rows = (self.optionButtons.count + self.optionButtons.count - 1) / self.itemsPerRow;
+
+
+        return CGSizeMake(UIViewNoIntrinsicMetric, rows * height + self.rowSpacing * (rows - 1));
     }
 }
 
@@ -106,6 +106,7 @@ static CGFloat rowHeight = 30;
     
     while(!fits) {
         NSUInteger itemsPerRow = [self itemsPerRow:rows];
+        CGFloat rowHeight = [self rowHeightWithRowCount:rows];
         CGFloat width = [self itemWidthWithHeight:rowHeight];
         CGFloat requiredWidth = itemsPerRow * width;
         if(requiredWidth < self.bounds.size.width) {
@@ -114,6 +115,7 @@ static CGFloat rowHeight = 30;
                 NSUInteger itemsInRow = [self itemsInRow:row withMaxItemsPerRow:itemsPerRow itemCount:self.optionButtons.count];
                 NSUInteger column = idx % itemsPerRow;
                 CGFloat y = rowHeight * row + self.rowSpacing * row;
+
                 CGFloat interItemSpacing = (self.bounds.size.width - width * itemsInRow) / (itemsInRow + 1);
                 CGFloat x = column * width + (column + 1) * interItemSpacing;
                 obj.frame = CGRectMake(x, y, width, rowHeight);

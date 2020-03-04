@@ -11,7 +11,7 @@ import Foundation
 public class DataManager : NSObject {
     let courseDataManager : CourseDataManager
     let enrollmentManager : EnrollmentManager
-    let interface : OEXInterface?
+    @objc let interface : OEXInterface?
     @objc let pushSettings : OEXPushSettingsManager
     let userProfileManager : UserProfileManager
     let userPreferenceManager: UserPreferenceManager

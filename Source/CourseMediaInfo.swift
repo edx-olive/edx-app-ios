@@ -9,21 +9,21 @@
 import Foundation
 
 public class CourseMediaInfo: NSObject {
-    let name: String?
+    @objc let name: String?
     @objc let uri: String?
     
-    public init(name : String?, uri : String?) {
+    @objc public init(name : String?, uri : String?) {
         self.name = name
         self.uri = uri
     }
     
     @objc public init(dict : [String : AnyObject]?) {
-        name = dict?["name"] as? String
-        uri = dict?["uri"] as? String
+        self.name = dict?["name"] as? String
+        self.uri = dict?["uri"] as? String
         super.init()
     }
     
-    public var dictionary : [String:AnyObject] {
+    @objc public var dictionary : [String:AnyObject] {
         return stripNullsFrom(dict: ["name" : name as AnyObject, "uri" : uri as AnyObject])
     }
 }

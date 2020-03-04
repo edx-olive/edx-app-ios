@@ -37,8 +37,8 @@ class DiscussionBlockViewController: UIViewController,CourseBlockViewController 
         super.viewDidLoad()
         self.view.backgroundColor = OEXStyles.shared().standardBackgroundColor()
         
-        addChild(postsController)
-        postsController.didMove(toParent: self)
+        addChildViewController(postsController)
+        postsController.didMove(toParentViewController: self)
         
         view.addSubview(postsController.view)
     }

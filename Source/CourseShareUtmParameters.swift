@@ -10,8 +10,8 @@ import UIKit
 
 @objc class CourseShareUtmParameters: NSObject {
 
-    let facebook: String?
-    let twitter: String?
+    @objc let facebook: String?
+    @objc let twitter: String?
     
     @objc init?(params: [String: Any]) {
         facebook = params["facebook"] as? String

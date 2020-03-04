@@ -85,7 +85,7 @@ public struct NetworkRequest<Out> {
                 headers: [String: String]? = nil,
                 deserializer : ResponseDeserializer<Out>) {
         self.method = method
-        self.path = path
+        self.path = path.starts(with: "http") ? path: path.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? path
         self.requiresAuth = requiresAuth
         self.body = body
         self.query = query
@@ -151,10 +151,10 @@ extension NSError {
     }
     
     static func oex_HTTPError(_ statusCode : Int, userInfo: [AnyHashable: Any]) -> NSError {
-        return NSError(domain: NetworkManager.errorDomain, code: statusCode, userInfo: userInfo as? [String : Any])
+        return NSError(domain: NetworkManager.errorDomain, code: statusCode, userInfo: userInfo as! [String : Any])
     }
     
-    public static func oex_outdatedVersionError() -> NSError {
+    @objc public static func oex_outdatedVersionError() -> NSError {
         return NSError(domain: NetworkManager.errorDomain, code: NetworkManager.Error.outdatedVersionError.rawValue, userInfo: nil)
     }
     
@@ -162,7 +162,7 @@ extension NSError {
         return self.domain == NSURLErrorDomain && (self.code == NSURLErrorNotConnectedToInternet || self.code == NSURLErrorNetworkConnectionLost)
     }
     
-    public func errorIsThisType(_ error: NSError) -> Bool {
+    @objc public func errorIsThisType(_ error: NSError) -> Bool {
         return error.domain == NetworkManager.errorDomain && error.code == self.code
     }
 }
@@ -174,7 +174,7 @@ open class NetworkManager : NSObject {
         case outdatedVersionError = -2
     }
     
-    public static let NETWORK = "NETWORK" // Logger key
+    public static let NETWORK = "NETWORK" // Logger keydfsgdfgs
     
     public typealias JSONInterceptor = (_ _response : HTTPURLResponse, _ _json : JSON) -> Result<JSON>
     public typealias Authenticator = (_ _response: HTTPURLResponse?, _ _data: Data) -> AuthenticationAction

@@ -66,7 +66,7 @@ static OEXConfig* sSharedConfig;
             return result;
         }
         else {
-            [Logger logError:@"CONFIG" :[NSString stringWithFormat:@"Couldn't read config key (%@) from environment. Invalid JSON: %@", key, value] file:@"" __FILE__ line:__LINE__];
+//            [Logger logError:@"CONFIG" :[NSString stringWithFormat:@"Couldn't read config key (%@) from environment. Invalid JSON: %@", key, value] file:@"" __FILE__ line:__LINE__];
         }
     }
     return self.properties[key];

@@ -66,32 +66,30 @@ NSString* const OEXErrorDomain = @"org.edx.error";
     switch (self.access.error_code) {
         case OEXStartDateError: {
             
-            NSAttributedString*(^template)(NSAttributedString*) =
-            [style applyWithF:^(NSString* s){ return [Strings courseWillStartAtDate:s]; }];
+            //TODO: nathan
+//            NSAttributedString*(^template)(NSAttributedString*) =
+//            [style applyWithF:^(NSString* s){ return [Strings courseWillStartAtDate:s]; }];
             if(self.displayInfo.type == OEXStartTypeString && self.displayInfo.displayDate.length > 0) {
                 NSAttributedString* styledDate = [style.withWeight(OEXTextWeightBold) attributedStringWithText:self.displayInfo.displayDate];
-                NSAttributedString* message = template(styledDate);
+                //NSAttributedString* message = template(styledDate);
+                NSAttributedString* message = [[NSAttributedString alloc] initWithString:[Strings courseWillStartAtDate:styledDate.string]];
                 return message;
             }
             else if(self.displayInfo.type == OEXStartTypeTimestamp && self.displayInfo.date != nil) {
                 NSString* displayDate = [DateFormatting formatAsMonthDayYearString: self.displayInfo.date];
                 NSAttributedString* styledDate = [style.withWeight(OEXTextWeightBold) attributedStringWithText:displayDate]; 
-                NSAttributedString* message = template(styledDate);
+                //NSAttributedString* message = template(styledDate);
+                NSAttributedString* message = [[NSAttributedString alloc] initWithString:[Strings courseWillStartAtDate:styledDate.string]];
                 return message;
             }
             else {
                 return [style attributedStringWithText: [Strings courseNotStarted]];
             }
         }
-        case OEXAuditExpired: {
-            return [style attributedStringWithText: [Strings courseAuditExpiredErrorMessage]];
-        }
-
         case OEXMilestoneError:
         case OEXVisibilityError:
         case OEXUnknownError:
             return [style attributedStringWithText: self.access.user_message ?: [Strings coursewareUnavailable]];
-
     }
 
 }

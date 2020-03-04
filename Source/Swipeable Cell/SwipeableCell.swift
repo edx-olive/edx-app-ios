@@ -39,7 +39,7 @@ class SwipeableCell: UITableViewCell {
         get { return super.frame }
     }
     
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         panGestureRecognizer.addAction {[weak self]_ in
             self?.handlePan(gesture: (self?.panGestureRecognizer)!)
@@ -311,7 +311,7 @@ extension SwipeableCell: SwipeActionsViewDelegate {
 
 extension UITableView {
     var swipeCells: [SwipeableCell] {
-        return visibleCells.compactMap({ $0 as? SwipeableCell })
+        return visibleCells.flatMap({ $0 as? SwipeableCell })
     }
     
     func hideSwipeCell() {

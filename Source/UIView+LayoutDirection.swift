@@ -14,7 +14,6 @@ extension UIView {
         switch direction {
         case .leftToRight: return false
         case .rightToLeft: return true
-        @unknown default: return false
         }
     }
 }
@@ -39,7 +38,7 @@ extension UIControl {
             case .fill:
                 return .Fill
             default:
-                return .Fill
+                return .Center
             }
         }
         set {
@@ -52,6 +51,8 @@ extension UIControl {
                 self.contentHorizontalAlignment = .center
             case .Fill:
                 self.contentHorizontalAlignment = .fill
+            default:
+                self.contentHorizontalAlignment = .center
             }
         }
     }

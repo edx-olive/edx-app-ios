@@ -152,8 +152,6 @@ NSString* const OEXExternalRegistrationWithExistingAccountNotification = @"OEXEx
     self.toggleOptionalFieldsButton = [[UIButton alloc] init];
     [self.toggleOptionalFieldsButton setBackgroundColor:[UIColor whiteColor]];
     [self.toggleOptionalFieldsButton setAttributedTitle: [self.toggleButtonStyle attributedStringWithText:[Strings registrationShowOptionalFields]] forState:UIControlStateNormal];
-    // We made adjustsFontSizeToFitWidth as true to fix the dynamic type text
-    [self.toggleOptionalFieldsButton.titleLabel setAdjustsFontSizeToFitWidth:true];
     [self.toggleOptionalFieldsButton addTarget:self action:@selector(toggleOptionalFields:) forControlEvents:UIControlEventTouchUpInside];
 
     UITapGestureRecognizer* tapGesture = [[UITapGestureRecognizer alloc] init];
@@ -167,13 +165,11 @@ NSString* const OEXExternalRegistrationWithExistingAccountNotification = @"OEXEx
     if(self.environment.config.facebookConfig.enabled) {
         [providers addObject:[[OEXFacebookAuthProvider alloc] init]];
     }
-    
-    if(self.environment.config.microsoftConfig.enabled) {
-        [providers addObject:[[OEXMicrosoftAuthProvider alloc] init]];
+    if(self.environment.config.samlProviderConfig.enabled) {
+        [providers addObject:[[SamlAuthProvider alloc] initWithEnvironment:self.environment authEntry:@"register"]];
     }
-    
     if(providers.count > 0) {
-        OEXExternalRegistrationOptionsView* headingView = [[OEXExternalRegistrationOptionsView alloc] initWithFrame:self.view.bounds providers:providers];
+        OEXExternalRegistrationOptionsView* headingView = [[OEXExternalRegistrationOptionsView alloc] initWithFrame:CGRectZero providers:providers];
         headingView.delegate = self;
         [self useHeadingView:headingView];
     }
@@ -207,6 +203,7 @@ NSString* const OEXExternalRegistrationWithExistingAccountNotification = @"OEXEx
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
+    [self handleSamlLogin];
     
     // Scrolling on keyboard hide and show
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -262,7 +259,7 @@ NSString* const OEXExternalRegistrationWithExistingAccountNotification = @"OEXEx
     [self.currentHeadingView mas_remakeConstraints:^(MASConstraintMaker *make) {
         make.top.equalTo(self.scrollView);
         make.centerX.equalTo(self.scrollView);
-        make.width.equalTo(self.scrollView).offset(-margin);
+        make.width.equalTo(self.scrollView).offset(-2 * margin);
     }];
     [super updateViewConstraints];
 }
@@ -336,7 +333,7 @@ NSString* const OEXExternalRegistrationWithExistingAccountNotification = @"OEXEx
     offset = offset + 40;
     
     [self.scrollView addSubview:self.agreementTextView];
-    [self.agreementTextView setFrame:CGRectMake(horizontalSpacing + 10, offset + 10, width - 3 * horizontalSpacing, self.agreementTextView.frame.size.height)];
+    [self.agreementTextView setFrame:CGRectMake(horizontalSpacing, offset + 10, width - 2 * horizontalSpacing, self.agreementTextView.frame.size.height)];
     offset = offset + self.agreementTextView.frame.size.height + [[OEXStyles sharedStyles] standardHorizontalMargin] * 2;
     [self.scrollView setContentSize:CGSizeMake(width, offset)];
 }
@@ -354,6 +351,11 @@ NSString* const OEXExternalRegistrationWithExistingAccountNotification = @"OEXEx
 #pragma mark ExternalRegistrationOptionsDelegate
 
 - (void)optionsView:(OEXExternalRegistrationOptionsView *)view choseProvider:(id<OEXExternalAuthProvider>)provider {
+    if ([provider isKindOfClass:[SamlAuthProvider class]]) {
+        SamlAuthProvider *samlProvider = provider;
+        [samlProvider initializeSamlViewControllerWithView:self];
+        return;
+    }
     [provider authorizeServiceFromController:self requestingUserDetails:YES withCompletion:^(NSString *accessToken, OEXRegisteringUserDetails *userDetails, NSError *error) {
         if(error == nil) {
             [view beginIndicatingActivity];
@@ -388,7 +390,7 @@ NSString* const OEXExternalRegistrationWithExistingAccountNotification = @"OEXEx
     __block OEXRegistrationViewController *blockSelf = self;
 
     dispatch_async(dispatch_get_main_queue(), ^{
-        UIView* headingView = [[OEXUsingExternalAuthHeadingView alloc] initWithFrame:self.view.bounds serviceName:provider.displayName];
+        UIView* headingView = [[OEXUsingExternalAuthHeadingView alloc] initWithFrame:CGRectZero serviceName:provider.displayName];
         [blockSelf useHeadingView:headingView];
         [blockSelf receivedFields:userDetails fromProvider:provider withAccessToken:accessToken];
     });
@@ -461,19 +463,33 @@ NSString* const OEXExternalRegistrationWithExistingAccountNotification = @"OEXEx
 
 - (void) showInputErrorAlert {
     __weak typeof(self) weakSelf = self;
-    
-    [[UIAlertController alloc] showAlertWithTitle:[Strings registrationErrorAlertTitle] message:[Strings registrationErrorAlertMessage] cancelButtonTitle:[Strings ok] onViewController:self tapBlock:^(UIAlertController * _Nonnull controller, UIAlertAction * _Nonnull action, NSInteger index) {
-        for(id <OEXRegistrationFieldController> controller in weakSelf.fieldControllers) {
-            if(![controller isValidInput]) {
-                    [[controller accessibleInputField] becomeFirstResponder];
-                    break;
-            }
-        }
-    }];
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:[Strings registrationErrorAlertTitle] message:[Strings registrationErrorAlertMessage] preferredStyle:UIAlertControllerStyleAlert];
+    [alert addAction:[UIAlertAction actionWithTitle:[Strings ok] style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                for(id <OEXRegistrationFieldController> controller in weakSelf.fieldControllers) {
+                    if(![controller isValidInput]) {
+                            [[controller accessibleInputField] becomeFirstResponder];
+                            break;
+                    }
+                }
+
+    }]];
+    [self presentViewController:alert animated:YES completion:nil];
+
+    //TODO: nathan
+//    [[UIAlertController alloc] showAlertWithTitle:[Strings registrationErrorAlertTitle] message:[Strings registrationErrorAlertMessage] cancelButtonTitle:[Strings ok] onViewController:self tapBlock:^(UIAlertController * _Nonnull controller, UIAlertAction * _Nonnull action, NSInteger index) {
+//        for(id <OEXRegistrationFieldController> controller in weakSelf.fieldControllers) {
+//            if(![controller isValidInput]) {
+//                    [[controller accessibleInputField] becomeFirstResponder];
+//                    break;
+//            }
+//        }
+//    }];
 }
 
 - (void) showNoNetworkError {
-    [[UIAlertController alloc] showAlertWithTitle:[Strings networkNotAvailableTitle] message:[Strings networkNotAvailableMessage] onViewController:self];
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:[Strings networkNotAvailableTitle] message:[Strings networkNotAvailableMessage] preferredStyle:UIAlertControllerStyleAlert];
+    [alert addAction:[UIAlertAction actionWithTitle:[Strings ok] style:UIAlertActionStyleDefault handler:nil]];
+    [self presentViewController:alert animated:YES completion:nil];
 }
 
 - (void)scrollViewTapped:(id)sender {
@@ -523,6 +539,14 @@ NSString* const OEXExternalRegistrationWithExistingAccountNotification = @"OEXEx
 
 - (BOOL) isRTL {
     return [UIApplication sharedApplication].userInterfaceLayoutDirection == UIUserInterfaceLayoutDirectionRightToLeft;
+}
+
+- (void)handleSamlLogin {
+    NSHTTPCookie *cookie = self.environment.session.sessionCookie;
+    OEXUserDetails *userDetails = self.environment.session.currentUser;
+    if (userDetails && cookie) {
+        [self.delegate registrationViewControllerDidRegister:self completion: nil];
+    }
 }
 
 @end

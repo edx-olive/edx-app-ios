@@ -24,9 +24,8 @@ static NSString* const OEXFindCoursePathPrefix = @"course/";
 
 @interface OEXFindCoursesViewController () <WebViewNavigationDelegate, InterfaceOrientationOverriding>
 
-@property (strong, nonatomic) DiscoveryWebViewHelper* webViewHelper;
+@property (strong, nonatomic) FindCoursesWebViewHelper* webViewHelper;
 @property (strong, nonatomic) UIView* bottomBar;
-@property (nonatomic) BOOL showBottomBar;
 @property (strong, nonatomic) NSString* searchQuery;
 @property (strong, nonatomic) RouterEnvironment* environment;
 
@@ -34,13 +33,12 @@ static NSString* const OEXFindCoursePathPrefix = @"course/";
 
 @implementation OEXFindCoursesViewController
 
-- (instancetype) initWithEnvironment:(RouterEnvironment *)environment showBottomBar:(BOOL) showBottomBar bottomBar:(UIView *)bottomBar searchQuery:(nullable NSString *)searchQuery  {
+- (instancetype) initWithEnvironment:(RouterEnvironment*)environment bottomBar:(UIView*)bottomBar searchQuery:(nullable NSString *)searchQuery  {
     self = [super init];
     if (self) {
         _environment = environment;
         _bottomBar = bottomBar;
         _searchQuery = searchQuery;
-        _showBottomBar = showBottomBar;
 
         [self loadCourseDiscovery];
     }
@@ -55,18 +53,18 @@ static NSString* const OEXFindCoursePathPrefix = @"course/";
 }
 
 - (void) loadCourseDiscovery {
-    self.webViewHelper = [[DiscoveryWebViewHelper alloc] initWithEnvironment:self.environment delegate:self bottomBar:_showBottomBar ? _bottomBar : nil showSearch:YES searchQuery:_searchQuery showSubjects:YES discoveryType: DiscoveryTypeCourse];
+    self.webViewHelper = [[FindCoursesWebViewHelper alloc] initWithEnvironment:self.environment delegate:self bottomBar:_bottomBar showSearch:YES searchQuery:_searchQuery showSubjects:YES];
     self.view.backgroundColor = [self.environment.styles standardBackgroundColor];
 
-    self.webViewHelper.baseURL = [self discoveryConfig].webview.baseURL;
+    self.webViewHelper.searchBaseURL = [self enrollmentConfig].webviewConfig.searchURL;
     NSURL* urlToLoad = nil;
     switch (self.startURL) {
         case OEXFindCoursesBaseTypeFindCourses:
-            urlToLoad = [self discoveryConfig].webview.baseURL;
+            urlToLoad = [self enrollmentConfig].webviewConfig.searchURL;
             break;
         case OEXFindCoursesBaseTypeExploreSubjects:
             self.navigationItem.title = [Strings startupExploreSubjects];
-            urlToLoad = [self discoveryConfig].webview.exploreSubjectsURL;
+            urlToLoad = [self enrollmentConfig].webviewConfig.exploreSubjectsURL;
             break;
     }
     
@@ -79,7 +77,7 @@ static NSString* const OEXFindCoursePathPrefix = @"course/";
 }
     
 -(NSString *) courseDiscoveryTitle {
-    if ([[self discoveryConfig] isCourseDiscoveryNative]) {
+    if ([[self enrollmentConfig] isCourseDiscoveryNative]) {
         return [Strings findCourses];
     }
     
@@ -96,8 +94,8 @@ static NSString* const OEXFindCoursePathPrefix = @"course/";
     [self.environment.analytics trackScreenWithName:OEXAnalyticsScreenFindCourses];
 }
 
-- (CourseDiscovery*)discoveryConfig {
-    return [self.environment.config.discovery course];
+- (EnrollmentConfig*)enrollmentConfig {
+    return [self.environment.config courseEnrollmentConfig];
 }
 
 - (NSString*)getCoursePathIDFromURL:(NSURL*)url {
@@ -123,7 +121,7 @@ static NSString* const OEXFindCoursePathPrefix = @"course/";
 }
 
 - (BOOL)webView:(WKWebView * _Nonnull)webView shouldLoad:(NSURLRequest * _Nonnull)request {
-    NSString* coursePathID = [DiscoveryHelper detailPathIDFrom:request.URL];
+    NSString* coursePathID = [CourseDiscoveryHelper detailPathIDFrom:request.URL];
     if(coursePathID != nil) {
         [self.environment.router showCourseDetailsFrom:self with:coursePathID bottomBar:[_bottomBar copy]];
         return NO;

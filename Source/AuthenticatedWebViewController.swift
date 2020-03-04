@@ -26,7 +26,6 @@ class HeaderViewInsets : ContentInsetsSource {
 private protocol WebContentController {
     var view : UIView {get}
     var scrollView : UIScrollView {get}
-    var isLoading: Bool {get}
     
     var alwaysRequiresOAuthUpdate : Bool { get}
     
@@ -66,8 +65,20 @@ private class WKWebViewContentController : WebContentController {
         if let userAgent = UserDefaults.standard.string(forKey: "UserAgent"), webView.customUserAgent?.isEmpty ?? false {
             webView.customUserAgent = userAgent
         }
-    
+        setLanguageCookie(request: request)
         webView.load(request as URLRequest)
+    }
+    
+    func setLanguageCookie(request: NSURLRequest) {
+        let cookie = HTTPCookie(properties: [
+            .name: "openedx-language-preference",
+            .value: String(Locale.preferredLanguages[0].prefix(2)),
+            .path: "/",
+            .domain: "." + (request.url?.host)!])
+        
+        if #available(iOS 11.0, *) {
+            webView.configuration.websiteDataStore.httpCookieStore.setCookie(cookie!, completionHandler: nil)
+        }
     }
     
     func resetState() {
@@ -82,17 +93,13 @@ private class WKWebViewContentController : WebContentController {
     var initialContentState : AuthenticatedWebViewController.State {
         return AuthenticatedWebViewController.State.LoadingContent
     }
-
-    var isLoading: Bool {
-        return webView.isLoading
-    }
 }
 
 private let OAuthExchangePath = "/oauth2/login/"
 
 // Allows access to course content that requires authentication.
 // Forwarding our oauth token to the server so we can get a web based cookie
-public class AuthenticatedWebViewController: UIViewController, WKNavigationDelegate {
+public class AuthenticatedWebViewController: UIViewController, WKUIDelegate, WKNavigationDelegate {
     
     fileprivate enum State {
         case CreatingSession
@@ -111,13 +118,10 @@ public class AuthenticatedWebViewController: UIViewController, WKNavigationDeleg
     private lazy var webController : WebContentController = {
         let controller = WKWebViewContentController()
         controller.webView.navigationDelegate = self
+        controller.webView.uiDelegate = self
         return controller
     
     }()
-    
-    var scrollView: UIScrollView {
-        return webController.scrollView
-    }
     
     private var state = State.CreatingSession
     
@@ -142,7 +146,6 @@ public class AuthenticatedWebViewController: UIViewController, WKNavigationDeleg
         
         automaticallyAdjustsScrollViewInsets = false
         webController.view.accessibilityIdentifier = "AuthenticatedWebViewController:authenticated-web-view"
-        addObservers()
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -153,38 +156,25 @@ public class AuthenticatedWebViewController: UIViewController, WKNavigationDeleg
         // Prevent crash due to stale back pointer, since WKWebView's UIScrollView apparently doesn't
         // use weak for its delegate
         webController.scrollView.delegate = nil
-        NotificationCenter.default.removeObserver(self)
     }
     
     override public func viewDidLoad() {
-        super.viewDidLoad()
-
-        state = webController.initialContentState
-        view.addSubview(webController.view)
+        
+        self.state = webController.initialContentState
+        self.view.addSubview(webController.view)
         webController.view.snp.makeConstraints { make in
             make.edges.equalTo(safeEdges)
         }
-        loadController.setupInController(controller: self, contentView: webController.view)
+        self.loadController.setupInController(controller: self, contentView: webController.view)
         webController.view.backgroundColor = OEXStyles.shared().standardBackgroundColor()
         webController.scrollView.backgroundColor = OEXStyles.shared().standardBackgroundColor()
-        insetsController.setupInController(owner: self, scrollView: webController.scrollView)
         
-        if let request = contentRequest {
+        self.insetsController.setupInController(owner: self, scrollView: webController.scrollView)
+        
+        
+        if let request = self.contentRequest {
             loadRequest(request: request)
         }
-    }
-
-    private func addObservers() {
-        NotificationCenter.default.oex_addObserver(observer: self, name: NOTIFICATION_DYNAMIC_TEXT_TYPE_UPDATE) { (_, observer, _) in
-            observer.reload()
-        }
-    }
-
-    public func reload() {
-        guard let request = contentRequest, !webController.isLoading else { return }
-
-        state = .LoadingContent
-        loadRequest(request: request)
     }
     
     private func resetState() {
@@ -255,14 +245,19 @@ public class AuthenticatedWebViewController: UIViewController, WKNavigationDeleg
     
     private func refreshAccessibility() {
         DispatchQueue.main.async {
-            UIAccessibility.post(notification: UIAccessibility.Notification.layoutChanged, argument: nil)
+            UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nil)
         }
     }
     
     // MARK: Request Loading
     
     public func loadRequest(request : NSURLRequest) {
-        contentRequest = request
+        let mainRequest = request.mutableCopy() as! NSMutableURLRequest
+        if let cookie = self.environment.session.sessionCookie {
+            let cookieString = String(format: "%@=%@", cookie.name, cookie.value)
+            mainRequest.addValue(cookieString, forHTTPHeaderField: "Cookie")
+        }
+        contentRequest = mainRequest
         loadController.state = .Initial
         state = webController.initialContentState
         
@@ -273,7 +268,7 @@ public class AuthenticatedWebViewController: UIViewController, WKNavigationDeleg
             loadOAuthRefreshRequest()
         }
         else {
-            webController.loadURLRequest(request: request)
+            webController.loadURLRequest(request: mainRequest)
         }
     }
     
@@ -353,5 +348,20 @@ public class AuthenticatedWebViewController: UIViewController, WKNavigationDeleg
         else {
             completionHandler(.performDefaultHandling, nil)
         }
+    }
+    
+    public func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
+        
+        let alertController = UIAlertController(title: nil, message: message, preferredStyle: .actionSheet)
+        
+        alertController.addAction(UIAlertAction(title: "Ok", style: .default, handler: { (action) in
+            completionHandler(true)
+        }))
+        
+        alertController.addAction(UIAlertAction(title: "Cancel", style: .default, handler: { (action) in
+            completionHandler(false)
+        }))
+        
+        self.present(alertController, animated: true, completion: nil)
     }
 }

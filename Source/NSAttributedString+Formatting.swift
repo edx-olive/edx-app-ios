@@ -14,9 +14,9 @@ extension NSAttributedString {
             let mutableAttributedString = NSMutableAttributedString(attributedString: self)
             let range = (string as NSString).range(of: subString)
             let attributes = [
-                NSAttributedString.Key.link: value,
-                NSAttributedString.Key.foregroundColor: OEXStyles.shared().primaryBaseColor()
-                ] as [NSAttributedString.Key : Any]
+                NSAttributedStringKey.link: value,
+                NSAttributedStringKey.foregroundColor: OEXStyles.shared().primaryBaseColor()
+                ] as [NSAttributedStringKey : Any]
             mutableAttributedString.addAttributes(attributes, range: range)
             return mutableAttributedString
         }
@@ -27,7 +27,7 @@ extension NSAttributedString {
 
 extension OEXTextStyle {
 
-    @objc func apply(f : @escaping (String) -> String) -> ((NSAttributedString) -> NSAttributedString) {
+    func apply(f : @escaping (String) -> String) -> ((NSAttributedString) -> NSAttributedString) {
         return {(s : NSAttributedString) in
             let string = f("{__param__}")
             let template = self.attributedString(withText: string)

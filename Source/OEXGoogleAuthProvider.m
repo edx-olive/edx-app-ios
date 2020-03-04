@@ -16,8 +16,8 @@
 
 @implementation OEXGoogleAuthProvider
 
-- (UIColor*)googleBlue {
-    return [UIColor colorWithRed:66.0/255.0 green:133.0/255.0 blue:244.0/255.0 alpha:1];
+- (UIColor*)googleRed {
+    return [UIColor colorWithRed:230./255. green:66./255. blue:55./255. alpha:1];
 }
 
 - (NSString*)displayName {
@@ -31,12 +31,14 @@
 - (OEXExternalAuthProviderButton*)freshAuthButton {
     OEXExternalAuthProviderButton* button = [[OEXExternalAuthProviderButton alloc] initWithFrame:CGRectZero];
     button.provider = self;
+    // Because of the '+' the G icon is off center. This accounts for that.
+    [button setImageEdgeInsets:UIEdgeInsetsMake(0, 3, 0, -3)];
     [button setImage:[UIImage imageNamed:@"icon_google_white"] forState:UIControlStateNormal];
-    [button useBackgroundImageOfColor:[self googleBlue]];
+    [button useBackgroundImageOfColor:[self googleRed]];
     return button;
 }
-- (void)authorizeServiceFromController:(UIViewController *)controller requestingUserDetails:(BOOL)loadUserDetails withCompletion:(void (^)(NSString * _Nullable , OEXRegisteringUserDetails * _Nullable, NSError * _Nullable))completion {
 
+- (void)authorizeServiceFromController:(UIViewController *)controller requestingUserDetails:(BOOL)loadUserDetails withCompletion:(void (^)(NSString *, OEXRegisteringUserDetails *, NSError *))completion {
     [[OEXGoogleSocial sharedInstance] loginFromController:controller withCompletion:^(NSString* token, NSError* error){
         [[OEXGoogleSocial sharedInstance] clearHandler];
         if(error) {

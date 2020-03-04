@@ -49,8 +49,8 @@ class CourseCatalogViewController: UIViewController, CoursesTableViewControllerD
     }
 
     private func setupAndLoadCourseCatalog() {
-        addChild(tableController)
-        tableController.didMove(toParent: self)
+        addChildViewController(tableController)
+        tableController.didMove(toParentViewController: self)
         self.loadController.setupInController(controller: self, contentView: tableController.view)
 
         self.view.addSubview(tableController.view)

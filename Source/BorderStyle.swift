@@ -67,9 +67,15 @@ extension UIView {
 }
 
 extension OEXPlaceholderTextView {
-    func applyStandardBorderStyle() {
+    @objc func applyStandardBorderStyle() {
         textContainerInset = OEXStyles.shared().standardTextViewInsets
-        typingAttributes = OEXStyles.shared().textAreaBodyStyle.attributes.attributedKeyDictionary()
+        
+        var typingAttributes = [String: Any]()
+        for (key, value) in OEXStyles.shared().textAreaBodyStyle.attributes {
+            typingAttributes[key.rawValue] = value
+        }
+
+        self.typingAttributes = typingAttributes
         placeholderTextColor = OEXStyles.shared().neutralLight()
         applyBorderStyle(style: OEXStyles.shared().entryFieldBorderStyle)
     }

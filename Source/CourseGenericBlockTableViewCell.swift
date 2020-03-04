@@ -11,7 +11,7 @@ import UIKit
 class CourseGenericBlockTableViewCell : UITableViewCell, CourseBlockContainerCell {
     fileprivate let content = CourseOutlineItemView()
 
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         contentView.addSubview(content)
         content.snp.makeConstraints { make in
@@ -21,10 +21,6 @@ class CourseGenericBlockTableViewCell : UITableViewCell, CourseBlockContainerCel
     
     var block : CourseBlock? = nil {
         didSet {
-            if block?.isGated ?? false {
-                content.leadingIconColor = OEXStyles.shared().neutralBase()
-                content.setDetailText(title: Strings.courseContentGated, blockType: block?.type)
-            }
             content.setTitleText(title: block?.displayName)
         }
     }
@@ -37,7 +33,7 @@ class CourseGenericBlockTableViewCell : UITableViewCell, CourseBlockContainerCel
 class CourseHTMLTableViewCell: CourseGenericBlockTableViewCell {
     static let identifier = "CourseHTMLTableViewCellIdentifier"
     
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
         super.init(style : style, reuseIdentifier : reuseIdentifier)
         content.setContentIcon(icon: Icon.CourseHTMLContent)
     }
@@ -51,7 +47,7 @@ class CourseHTMLTableViewCell: CourseGenericBlockTableViewCell {
 class CourseProblemTableViewCell : CourseGenericBlockTableViewCell {
     static let identifier = "CourseProblemTableViewCellIdentifier"
     
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
         super.init(style : style, reuseIdentifier : reuseIdentifier)
         content.setContentIcon(icon: Icon.CourseProblemContent)
     }
@@ -66,7 +62,7 @@ class CourseUnknownTableViewCell: CourseGenericBlockTableViewCell {
     
     static let identifier = "CourseUnknownTableViewCellIdentifier"
 
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         content.leadingIconColor = OEXStyles.shared().neutralBase()
         content.setContentIcon(icon: Icon.CourseUnknownContent)
@@ -82,7 +78,7 @@ class DiscussionTableViewCell: CourseGenericBlockTableViewCell {
     
     static let identifier = "DiscussionTableViewCellIdentifier"
     
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         content.setContentIcon(icon: Icon.Discussions)
     }

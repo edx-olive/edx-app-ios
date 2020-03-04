@@ -44,7 +44,7 @@ open class Logger : NSObject {
         }
     }
     
-    public override init() {
+    @objc public override init() {
         printAll = UserDefaults.standard.bool(forKey: printAllKey)
         activeDomains = Set(UserDefaults.standard.object(forKey: domainsKey) as? [String] ?? [])
         super.init()

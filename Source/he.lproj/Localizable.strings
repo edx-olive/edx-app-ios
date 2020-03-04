@@ -22,8 +22,6 @@
 "ACCESSIBILITY_CHECKBOX_HINT_UNCHECKED" = "הקישו לבחירה";
 /* Appending By before course organization and number on My Find Courses*/
 "ACCESSIBILITY_BY" = "מוצע על ידי";
-/*Accessibility hint for user bio on user profile screen*/
-"ACCESSIBILITY.ACCOUNT.BIO_LABEL" = "Description";
 /* Accessibility hint for subject name label */
 "ACCESSIBILITY.BROWSER_BY_SUBJECT_HINT" = "הקישו פעמיים כדי לעיין לפי נושא, {subject_name}";
 /* Accessibility hint for bulk download switch when in new state */
@@ -48,8 +46,6 @@
 "ACCESSIBILITY.DISCUSSION_FOLLOW_HINT" = "הקישו פעמיים כדי לעקוב";
 /* Accessibility hint for Unfollow button for discussion responses*/
 "ACCESSIBILITY.DISCUSSION_UNFOLLOW_HINT" = "הקישו פעמיים כדי להפסיק לעקוב.";
-/*Accessibility hint for disabled buttons, cells, etc like for disabled user profile fields on user edit profile screen*/
-"ACCESSIBILITY.DISABLED_HINT" = "Dimmed";
 /* Acessibility hint for the show downloads button. */
 "ACCESSIBILITY.SHOW_CURRENT_DOWNLOADS_BUTTON_HINT" = "הקישו פעמיים כדי לצפות בהורדות המתבצעות כעת";
 /* Accessibility hint for view all subjects label*/
@@ -153,9 +149,7 @@
 /*Accessibility text for close button*/
 "ACCESSIBILITY.CLOSE_LABEL"="סגור";
 /*Accessibility text for profile button*/
-"ACCESSIBILITY.PROFILE_LABEL"="Profile";
-/* Accessibility trait for image */
-"ACCESSIBILITY_IMAGE_VOICE_OVER_HINT"="Image";
+"ACCESSIBILITY.PROFILE_LABEL"="פרופיל";
 /* Title of user profile section for user accomplishments (like badges) */
 "ACCOMPLISHMENTS.TITLE" = "הישגים";
 /* Default text template when user shares an accomplishment */
@@ -173,7 +167,7 @@
 /* Add your post button title used in discussion's add a post textview */
 "ADD_YOUR_POST"="הוסיפו את הפוסט שלכם";
 /*Agreement text*/
-"AGREEMENT.TEXT"="you agree to the {eula} and {tos} and you acknowledge that {platform_name} and each Member process your personal data in accordance with the  {privacy_policy}.";
+"AGREEMENT.TEXT"="אתם מסכימים ל-{eula} ול-{tos} ומאשרים שקראתם את {privacy_policy}.";
 /*Agreement text prefix for user on signin screen*/
 "AGREEMENT.TEXT_PREFIX_SIGNIN"="עם הכניסה לאפליקציה,";
 /*Agreement text prefix for user on signup screen*/
@@ -188,6 +182,8 @@
 "ALLOW"="אפשר";
 /* Filtering option to show all discussion posts */
 "ALL_POSTS"="כל הפוסטים";
+/* Tab allowing the user to see all videos */
+"ALL_VIDEOS"="כל קבצי הוידאו";
 /*Subtitle for bulk download view when in downloading state */
 "ALL_DOWNLOADING_VIDEOS_SUB_TITLE" = "נותרו {remaining_videos_count} קבצי וידאו, סה\"כ {remaining_videos_size}MB ";
 /*Title for bulk download view when in downloaded state */
@@ -299,7 +295,7 @@
 /* Label for posts pinned by Community TA(s)" */
 "COMMUNITY_TA"="עוזר הוראה בקהילה";
 /* Label indicating the amount of time a course will take */
-"COURSE_DETAIL.EFFORT"="מאמץ:";
+"COURSE_DETAIL.EFFORT"="משך זמן:";
 /* Label indicating when a course ends. */
 "COURSE_DETAIL.END_DATE"="תאריך סיום:";
 /* Button title allowing user to enroll in a course */
@@ -316,44 +312,6 @@
 "COURSE_CONTENT_UNKNOWN" = "רכיב אינטראקטיבי זה אינו זמין עדיין בגרסת המובייל.\n\nגלו חלקים אחרים בבקורס זה או צפו ברכיב זה ברשת.";
 /* Message shown when there is no course dates */
 "COURSEDATES.COURSE_DATE_UNAVAILABLE"="תאריכי הקורס אינם זמינים כעת";
-/* Label for date when course starts */
-"COURSE.STARTING" = "Starting {start_date}";
-/* Label for date when course end */
-"COURSE.ENDING" = "Ending {end_date}";
-/* Label indicated that a course has ended */
-"COURSE.ENDED"="Ended {end_date}";
-/* Course audit will expires on date*/
-"COURSE.AUDIT.EXPIRES_ON" = "Course access expires on {expiry_date}";
-/* Course audit will expires in {time_duration}*/
-"COURSE.AUDIT.EXPIRES_IN" = "Course access expires in {time_duration}";
-/* Course audit expired n days ago*/
-"COURSE.AUDIT.EXPIRED_DAYS_AGO" = "Course access expired {days} days ago";
-/* Course audit expired in less than 24 hours*/
-"COURSE.AUDIT.EXPIRED_AGO" = "Course access expired {time_duaration}";
-/* Course audit expired on date*/
-"COURSE.AUDIT.EXPIRED_ON" = "Course access expired on {expiry_date}";
-/* Course audit expiry in n number of days*/
-"COURSE.AUDIT.DAYS" = "{days} days";
-/* 1 hour remaining in course audit expiry*/
-/* More than 1 hours remaining in course audit expiry*/
-"COURSE_AUDIT_REMAINING_HOURS##{one}" = "{hours} hour";
-"COURSE_AUDIT_REMAINING_HOURS##{two}" = "{hours} hours";
-"COURSE_AUDIT_REMAINING_HOURS##{many}" = "{hours} hours";
-"COURSE_AUDIT_REMAINING_HOURS##{other}" = "{hours} hours";
-/* 1 minutes remaining in course audit expiry*/
-/* More than 1 minutes remaining in course audit expiry*/
-"COURSE_AUDIT_REMAINING_MINUTES##{one}" = "{minutes} minute";
-"COURSE_AUDIT_REMAINING_MINUTES##{two}" = "{minutes} minutes";
-"COURSE_AUDIT_REMAINING_MINUTES##{many}" = "{minutes} minutes";
-"COURSE_AUDIT_REMAINING_MINUTES##{other}" = "{minutes} minutes";
-/* 1 second remaining in course audit expiry*/
-/* More than 1 seconds remaining in course audit expiry*/
-"COURSE_AUDIT_REMAINING_SECONDS##{one}" = "{seconds} second";
-"COURSE_AUDIT_REMAINING_SECONDS##{two}" = "{seconds} seconds";
-"COURSE_AUDIT_REMAINING_SECONDS##{many}" = "{seconds} seconds";
-"COURSE_AUDIT_REMAINING_SECONDS##{other}" = "{seconds} seconds";
-/*Error meessage on course content screen if course audit expires*/
-"COURSE_AUDIT_EXPIRED_ERROR_MESSAGE" = "Your access to this course has expired";
 /* Title text for the Announcements section within the course dashboard */
 "DASHBOARD.COURSE_ANNOUNCEMENTS"="הודעות";
 /* Text describing the Announcements section within the course dashboard */
@@ -388,8 +346,14 @@
 "COURSE_DUE_DATE_SAME_DAY"="להגשה היום ב-{due_date} {time_zone}";
 /* Text describing the course due date*/
 "COURSE_DUE_DATE"="להגשה ב-{due_date}";
+/* Label indicated that a course has ended */
+"COURSE_ENDED"="הסתיים {end_date}";
+/* Label indicating that a course will end */
+"COURSE_ENDING"="מסתיים {end_date}";
 /* Option to show all different types of course content. Constrasts with 'Show Videos Only'. */
 "COURSE_MODE_FULL"="הצג קורס מלא";
+/* Option to show only video course content. Constrasts with 'Show All Course Content'. */
+"COURSE_MODE_VIDEO"="הצג קבצי וידאו בלבד";
 /* Label to describe the button that allows choosing between Video only mode and All Course Content mode */
 "COURSE_MODE_PICKER_DESCRIPTION" = "בורר המצבים";
 /* Text displayed when Can't find one of your courses is tapped on My Courses screen */
@@ -400,8 +364,6 @@
 "COURSE_WILL_START_AT"="קורס זה טרם החל. בקרו שוב ב-{date} כדי לראות את קבצי הוידאו שלכם.";
 /* Create a new post button title used in discussions' posts screen */
 "CREATE_A_NEW_POST"="צרו פוסט חדש";
-/* Chrome cast message */
-"CHROMECAST_MESSAGE"="Video is casting to remote device";
 /* Button text to initiate or confirm deletion */
 "DELETE"="מחק";
 /* Discussion used in the segmented control Creating a new post */
@@ -456,8 +418,6 @@
 "DISCOVER"="גילוי";
 /*Title for the programs in tabbar and navigation bar*/
 "PROGRAMS"="Programs";
-/*Title for the degrees in navigation bar*/
-"DEGREES"="Degrees";
 /*Debug option title in tabbar */
 "DEBUG"="פתור בעיות";
 /* Error message shown when email address is not properly formatted */
@@ -491,7 +451,7 @@
 /* Overlay message shown when facebook login fails because the user's account isn't linked */
 "FAILED_TO_LOAD_TOPICS"="טעינת הנושאים נכשלה.";
 /* Title of find courses screen */
-"FIND_COURSES"="חפש קורסים";
+"FIND_COURSES"="קטלוג";
 /* No available courses on find courses section */
 "FIND_COURSES_NO_AVAILABLE_COURSES"="אין קורסים זמינים";
 /* Overlay message shown when enrolling in a course fails because the user is already in the course */
@@ -545,9 +505,11 @@
 /* Option to sort discussion post list by most votes */
 "MOST_VOTES"="ההצבעות הרבות ביותר";
 /* Screen title showing a user's courses */
-"COURSES"="קורסים";
+"COURSES"="קורסים שלי";
 /* Screen title showing a user's settings */
 "MY_SETTINGS"="הגדרות שלי";
+/* Time Label in My Videos section*/
+"MY_VIDEOS_TIME_LABEL" = "נא";
 /* Marked as answer for endorsed responses */
 "MARKED_ANSWER" = "סמנו כתשובה";
 /* Overlay error shown when attempting an action without an internet connection */
@@ -570,6 +532,10 @@
 "NO_TRANSCRIPT" = "תמליל הוידאו הזה אינו זמין עדיין.";
 /* Message shown when user attempts to download a video over cellular data, but has chosen to only allow video downloads over wifi */
 "NO_WIFI_MESSAGE" = "הגדרות ההורדה הנוכחיות שלכם מאפשרות הורדה רק באמצעות רשת אלחוטית.\nאנא התחברו לרשת אלחוטית Wi-Fi או שנו את הגדרות ההורדה שלכם.";
+/* Message shown on videos screen when user has not downloaded any videos */
+"NO_VIDEOS_DOWNLOADED" = "לא הורדת אף סרטון.";
+/* Text shown when examining part of a course in video only mode, but that part of the course has no videos. {mode_switcher} will be replaced with a name or icon for the mode switch button */
+"NO_VIDEOS_TRY_MODE_SWITCHER" = "אין קבצי וידאו בקטע זה. כדי לצפות בתוכן של קטעים אחרים, בחרו ב-{mode_switcher} לעיל ועברו למצב קורס מלא.";
 /* Text displayed when no results are found for following*/
 "NO_FOLLOWING_RESULTS" = "אינכם עוקבים אחר שום פוסט.";
 /* Message shown when no results are found for all posts*/
@@ -586,10 +552,12 @@
 "OK"="OK";
 /* Button title allowing user to open current page in their web browser */
 "OPEN_IN_BROWSER"="צפו בספארי";
+/* Button title allowing user to open current page in their web browser */
+"OPEN_IN_BROWSER_TITLE"="הצג סרטונים בלבד";
 /* Button label to bring up course finder */
 "OR_SIGN_IN_WITH"="או התחבר באמצעות";
 /* Login screen password field title text */
-"PASSWORD_TITLE_TEXT" = "Password";
+"PASSWORD_TITLE_TEXT" = "סיסמה";
 /* Alert dialog button shown when finishing a video to ask if user should continue by watching the next video */
 "PLAYBACK_COMPLETE_CONTINUE"="המשך";
 /* Alert dialog button shown when finishing a video to ask if user should continue by watching the next video (negative option) */
@@ -613,7 +581,7 @@
 /* Button title for moving to the next unit in the course */
 "PREVIOUS_UNIT" = "היחידה הקודמת";
 /* A10y hint for the change picture button. */
-"PROFILE.CHANGE_PICTURE_ACCESSIBILITY_HINT" = "Double tap to change profile photo";
+"PROFILE.CHANGE_PICTURE_ACCESSIBILITY_HINT" = "העלו תמונת פרופיל חדשה";
 /* Change picture button text on edit profile screen. */
 "PROFILE.CHANGE_PICTURE_BUTTON" = "החלף";
 /* Text for use a photo already in library for user profile photo alert */
@@ -658,6 +626,8 @@
 "QUESTION"="שאלה";
 /* Option to sort discussion post list by recent activity */
 "RECENT_ACTIVITY" = "פעילות שבוצעה לאחרונה";
+/* Section title to display recently downloaded videos */
+"RECENT_VIDEOS"="קבצי וידאו שהורדו לאחרונה";
 /* Label before Sort and Filter buttons on Posts Screen ( The Colon(:) is part of the string) */
 "REFINE" = "סנן:";
 /* Button title when responses are closed for a thread */
@@ -719,12 +689,6 @@
 "RESPONSE##{other}"="{count} תגובות";
 /* Discussion topics search placeholder */
 "SEARCH_ALL_POSTS"="חפש בכל הפוסטים";
-/*Placeholder text for search course textfield*/
-"SEARCH_COURSES_PLACEHOLDER_TEXT"="Search course";
-/*Placeholder text for search program textfield*/
-"SEARCH_PROGRAMS_PLACEHOLDER_TEXT"="Search program";
-/*Placeholder text for search degree textfield*/
-"SEARCH_DEGREES_PLACEHOLDER_TEXT"="Search degree";
 /* Discussion search results  */
 "SEARCH_RESULTS"="חפש בתוצאות";
 /* Text shown below the video, in portrait mode */
@@ -741,16 +705,18 @@
 "SIGN_IN_TEXT"="היכנס";
 /* Message shown while user waits for response to a sign in request */
 "SIGN_IN_BUTTON_TEXT_ON_SIGN_IN"="נכנס";
-/*  Accessibility text prefix for  Facebook and Google Buttons*/
-"SIGN_IN_PROMPT"="Sign in with";
 /*Sign up screen title and button initiating sign up process on the main screen */
 "REGISTER_TEXT"="הירשמו";
 /* Indicates a date in the near future */
 "SOON"="בקרוב";
 /* Label for posts pinned by Staff */
 "STAFF"="צוות";
+/* Label for date when course starts */
+"STARTING"="החל {start_date}";
 /* Info message text on the startup screen */
-"STARTUP.INFO_MESSAGE_TEXT"="Courses from the world's best universities in your pocket.";
+"STARTUP.INFO_MESSAGE_TEXT"="קורסים בחינם מהאוניברסיטאות הטובות ביותר בעולם בכיס שלכם.";
+/*Placeholder text for search textfield on the startup screen*/
+"STARTUP.SEARCH_PLACEHOLDER_TEXT"="חפשו קורסים";
 /*Log In button title on the startup screen*/
 "STARTUP.LOGIN_TEXT"="היכנס";
 /*Create your Account button title on the startup screen*/
@@ -800,7 +766,7 @@
 /* Placeholder title for course content with no title */
 "UNTITLED"="ללא כותרת";
 /* Title text for login field */
-"USERNAME_TITLE_TEXT" = "Username or e-mail address";
+"USERNAME_TITLE_TEXT" = "שם משתמש או דואר אלקטרוני";
 /*Error message when operation failed with unknow error*/
 "UNKNOWN_ERROR" = "לא ניתן היה להשלים את הפעולה שלכם.";
 /* Screen title showing a user's account */
@@ -811,6 +777,26 @@
 "VERSION_DISPLAY" = "גרסה {number} {environment}";
 /* Error shown when video download fails */
 "VIDEO_CONTENT_NOT_AVAILABLE"="סרטון זה אינו זמין כרגע. בדוק שוב מאוחר יותר.";
+/* Floating overlay text shown after deleting a video. {count} is a number of videos */
+/* Floating overlay text shown after deleting a video. {count} is a number of videos */
+"VIDEOS_DELETED##{one}" = "קובץ וידאו {count} נמחק";
+"VIDEOS_DELETED##{two}" = "{count} קבצי וידאו נמחקו";
+"VIDEOS_DELETED##{many}" = "{count} קבצי וידאו נמחקו";
+"VIDEOS_DELETED##{other}" = "{count} קבצי וידאו נמחקו";
+/* Floating overlay text shown after video download begins. {count} is a number of videos  */
+/* Floating overlay text shown after video download begins. {count} is a number of videos  */
+"VIDEOS_DOWNLOADING##{one}" = "מוריד קובץ וידאו {count}";
+"VIDEOS_DOWNLOADING##{two}" = "מוריד {count} קבצי וידאו";
+"VIDEOS_DOWNLOADING##{many}" = "מוריד {count} קבצי וידאו";
+"VIDEOS_DOWNLOADING##{other}" = "מוריד {count} קבצי וידאו";
+/* Message shown to indicate a number of already downloaded videos. {count} is a number of videos  */
+/* Message shown to indicate a number of already downloaded videos. {count} is a number of videos  */
+"VIDEOS_DOWNLOADED##{one}" = "הסתיימה הורדת קובץ וידאו {count}";
+"VIDEOS_DOWNLOADED##{two}" = "הסתיימה הורדת {count} קבצי וידאו";
+"VIDEOS_DOWNLOADED##{many}" = "הסתיימה הורדת {count} קבצי וידאו";
+"VIDEOS_DOWNLOADED##{other}" = "הסתיימה הורדת {count} קבצי וידאו";
+/* Floating overlay text shown while videos download */
+"VIDEO_DOWNLOADS_IN_PROGRESS" = "הורדת וידאו מתבצעת כעת";
 /* Message shown instead of a video when attempting to watch a video that is only availabe on the web */
 "VIDEO_ONLY_ON_WEB" = "קובץ וידאו זה קיים כעת רק ברשת. הקישו כדי לצפות בו בדפדפן הרשת שלכם.";
 /* Alert dialog content shown when user attempts to view a video that hasn't been synced  */
@@ -857,5 +843,3 @@
 "WIFI_ONLY_DETAIL_MESSAGE" = "הורד תוכן רק כשחיבור הוויי-פיי דולק";
 /* Alert dialog button title to confirm an action */
 "YES"="כן";
-/* Invalid youtube url error message */
-"YOUTUBE_INVALID_URL_ERROR"="לא ניתן היה לטעון את הווידאו כתובת אתר לא חוקית.";

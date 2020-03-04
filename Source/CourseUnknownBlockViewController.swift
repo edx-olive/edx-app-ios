@@ -10,7 +10,7 @@ import UIKit
 
 class CourseUnknownBlockViewController: UIViewController, CourseBlockViewController {
     
-    typealias Environment = DataManagerProvider & OEXInterfaceProvider & OEXAnalyticsProvider & OEXConfigProvider
+    typealias Environment = DataManagerProvider & OEXInterfaceProvider & OEXAnalyticsProvider
     
     let environment : Environment
 
@@ -27,7 +27,7 @@ class CourseUnknownBlockViewController: UIViewController, CourseBlockViewControl
         
         super.init(nibName: nil, bundle: nil)
         
-        let courseQuerier = environment.dataManager.courseDataManager.querierForCourseWithID(courseID: self.courseID, environment: environment)
+        let courseQuerier = environment.dataManager.courseDataManager.querierForCourseWithID(courseID: self.courseID)
         courseQuerier.blockWithID(id: blockID).extendLifetimeUntilFirstResult (
             success:
             { [weak self] block in
@@ -58,12 +58,7 @@ class CourseUnknownBlockViewController: UIViewController, CourseBlockViewControl
     }
     
     private func showError() {
-        if let block = block, block.isGated {
-            messageView = IconMessageView(icon: Icon.Closed, message: Strings.courseContentGated)
-        }
-        else {
-            messageView = IconMessageView(icon: Icon.CourseUnknownContent, message: Strings.courseContentUnknown)
-        }
+        messageView = IconMessageView(icon: Icon.CourseUnknownContent, message: Strings.courseContentUnknown)
         messageView?.buttonInfo = MessageButtonInfo(title : Strings.openInBrowser)
         {
             [weak self] in
@@ -72,9 +67,10 @@ class CourseUnknownBlockViewController: UIViewController, CourseBlockViewControl
                     UIApplication.shared.openURL(url as URL)
                     self?.logOpenInBrowserEvent()
                 }
-            }, failure : {_ in
+                }, failure : {_ in
             })
         }
+        
         view.addSubview(messageView!)
     }
     
@@ -118,7 +114,7 @@ class CourseUnknownBlockViewController: UIViewController, CourseBlockViewControl
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        loader = environment.dataManager.courseDataManager.querierForCourseWithID(courseID: self.courseID, environment: environment).blockWithID(id: self.blockID).map {
+        loader = environment.dataManager.courseDataManager.querierForCourseWithID(courseID: self.courseID).blockWithID(id: self.blockID).map {
             return $0.webURL
             }.firstSuccess()
     }

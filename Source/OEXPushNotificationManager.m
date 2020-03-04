@@ -13,7 +13,6 @@
 #import "OEXPushListener.h"
 #import "OEXPushSettingsManager.h"
 #import "OEXSession.h"
-#import "edX-Swift.h"
 
 @interface OEXPushNotificationManager ()
 
@@ -48,26 +47,9 @@
 
 - (void)performRegistration {
     UIApplication* application = [UIApplication sharedApplication];
-
-    if ([[UIDevice currentDevice].systemVersion floatValue] >= 10.0) {
-        // iOS 10 or later
-        UNAuthorizationOptions authOptions = UNAuthorizationOptionAlert |
-        UNAuthorizationOptionSound | UNAuthorizationOptionBadge;
-        [UNUserNotificationCenter currentNotificationCenter].delegate = self;
-        [[UNUserNotificationCenter currentNotificationCenter]
-         requestAuthorizationWithOptions:authOptions
-         completionHandler:^(BOOL granted, NSError * _Nullable error) {
-         }];
-    }
-    else {
-        // iOS 10 notifications aren't available; fall back to iOS 9 notifications.
-        UIUserNotificationType types =
-        (UIUserNotificationTypeSound | UIUserNotificationTypeAlert | UIUserNotificationTypeBadge);
-        UIUserNotificationSettings *settings =
-        [UIUserNotificationSettings settingsForTypes:types categories:[NSSet set]];
-        [application registerUserNotificationSettings:settings];
-    }
-
+    UIUserNotificationType types = UIUserNotificationTypeAlert | UIUserNotificationTypeBadge | UIUserNotificationTypeSound;
+    UIUserNotificationSettings* settings = [UIUserNotificationSettings settingsForTypes:types categories:[NSSet set]];
+    [application registerUserNotificationSettings:settings];
     [application registerForRemoteNotifications];
 }
 
@@ -79,39 +61,32 @@
     [self.listeners removeObject:listener];
 }
 
-- (void)addListenersForConfiguration:(OEXConfig *)config environment:(RouterEnvironment *)environment {
-    if ([[config firebaseConfig] cloudMessagingEnabled]) {
-        FCMListner *listner = [[FCMListner alloc] initWithEnvironment:environment];
-        [self addListener:listner];
-    }
-}
-
 - (void)addProvider:(id <OEXPushProvider>)provider withSession:(OEXSession *)session {
     [self.providers addObject:provider];
-    if(session.currentUser != nil) {
-        [provider sessionStartedWithUserDetails:session.currentUser settingsManager:self.settingsManager];
-    }
+    //FIXME:- Uncomment this code when we do have a push notification provider
+//    if(session.currentUser != nil) {
+//        [provider sessionStartedWithUserDetails:session.currentUser settingsManager:self.settingsManager];
+//    }
 }
 
 - (void)addProvidersForConfiguration:(OEXConfig *)config withSession:(OEXSession *)session {
-    if ([[config firebaseConfig] cloudMessagingEnabled]){
-        FCMProvider *provide = [[FCMProvider alloc] init];
-        [self addProvider:provide withSession:session];
-    }
+
 }
 
 - (void)sessionStartedWithUserDetails:(OEXUserDetails*)userDetails {
-    for(id <OEXPushProvider> provider in self.providers) {
-        [provider sessionStartedWithUserDetails:userDetails settingsManager:self.settingsManager];
-    }
+    //FIXME:- Uncomment this code when we do have a push notification provider
+//    for(id <OEXPushProvider> provider in self.providers) {
+//        [provider sessionStartedWithUserDetails:userDetails settingsManager:self.settingsManager];
+//    }
 
     [self performRegistration];
 }
 
 - (void)sessionEnded {
-    for(id <OEXPushProvider> provider in self.providers) {
-        [provider sessionEnded];
-    }
+    //FIXME:- Uncomment this code when we do have a push notification provider
+//    for(id <OEXPushProvider> provider in self.providers) {
+//        [provider sessionEnded];
+//    }
 }
 
 - (void)didReceiveLocalNotificationWithUserInfo:(NSDictionary *)userInfo {
@@ -127,15 +102,17 @@
 }
 
 - (void)didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
-    for(id <OEXPushProvider> provider in self.providers) {
-        [provider didRegisterForRemoteNotificationsWithDeviceToken:deviceToken];
-    }
+    //FIXME:- Uncomment this code when we do have a push provider
+//    for(id <OEXPushProvider> provider in self.providers) {
+//        [provider didRegisterForRemoteNotificationsWithDeviceToken:deviceToken];
+//    }
 }
 
 - (void)didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
-    for(id <OEXPushProvider> provider in self.providers) {
-        [provider didFailToRegisterForRemoteNotificationsWithError:error];
-    }
+    //FIXME:- Uncomment this code when we do have a push provider
+//    for(id <OEXPushProvider> provider in self.providers) {
+//        [provider didFailToRegisterForRemoteNotificationsWithError:error];
+//    }
 }
 
 @end

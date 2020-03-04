@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import FirebaseAnalytics
 
 private let MaxParameterValueCharacters = 100
 
@@ -15,22 +14,22 @@ class FirebaseAnalyticsTracker: NSObject, OEXAnalyticsTracker {
     
     @objc static let minifiedBlockIDKey: NSString = "minifiedBlockID"
     
-    var currentOrientationValue : String {
-        return UIApplication.shared.statusBarOrientation.isLandscape ? OEXAnalyticsValueOrientationLandscape : OEXAnalyticsValueOrientationPortrait
+    @objc var currentOrientationValue : String {
+        return UIInterfaceOrientationIsLandscape(UIApplication.shared.statusBarOrientation) ? OEXAnalyticsValueOrientationLandscape : OEXAnalyticsValueOrientationPortrait
     }
     
     //Skipping these keys for Firebase analytics
     private let keysToSkip = [key_target_url, OEXAnalyticsKeyBlockID, "url"]
     
     func identifyUser(_ user : OEXUserDetails?) {
-        Analytics.setUserID(user?.userId?.stringValue)
+        FIRAnalytics.setUserID(user?.userId?.stringValue)
     }
     
     func clearIdentifiedUser() {
-        Analytics.setUserID(nil)
+        FIRAnalytics.setUserID(nil)
     }
     
-    func trackEvent(_ event: OEXAnalyticsEvent, forComponent component: String?, withProperties properties: [String : Any]) {
+    @objc func trackEvent(_ event: OEXAnalyticsEvent, forComponent component: String?, withProperties properties: [String : Any]) {
         
         // track event
         var parameters: [String: NSObject] = [key_app_name : value_app_name as NSObject]
@@ -50,11 +49,11 @@ class FirebaseAnalyticsTracker: NSObject, OEXAnalyticsTracker {
         
         var formattedParameters = [String: NSObject]()
         formatParamatersForFirebase(params: parameters, formattedParams: &formattedParameters)
-        Analytics.logEvent(formattedKeyForFirebase(key: event.displayName), parameters: formattedParameters)
+        FIRAnalytics.logEvent(withName: formattedKeyForFirebase(key: event.displayName), parameters: formattedParameters)
         
     }
     
-    func trackScreen(withName screenName: String, courseID: String?, value: String?, additionalInfo info: [String : String]?) {
+    @objc func trackScreen(withName screenName: String, courseID: String?, value: String?, additionalInfo info: [String : String]?) {
         var properties: [String:NSObject] = [:]
         if let value = value {
             properties["action"] = value as NSObject
@@ -134,13 +133,13 @@ class FirebaseAnalyticsTracker: NSObject, OEXAnalyticsTracker {
         // Firebase only supports 100 characters for parameter value
         if formattedValue.count > MaxParameterValueCharacters {
             let index = formattedValue.index(formattedValue.startIndex, offsetBy: MaxParameterValueCharacters)
-            formattedValue = String(formattedValue[..<index])
+            formattedValue = formattedValue.substring(to: index)
         }
         
         return formattedValue
     }
     
-    func splitParameterValue(key: String, value: String)-> [String : NSObject]{
+    @objc func splitParameterValue(key: String, value: String)-> [String : NSObject]{
         // Only using last identifier
         let components = value.components(separatedBy:"@")
         return [key: components.last! as NSObject]

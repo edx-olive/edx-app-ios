@@ -24,13 +24,18 @@
   NSMutableDictionary *_mutableLoggingExtras;
 }
 
+- (instancetype)init NS_UNAVAILABLE
+{
+  assert(0);
+}
+
 - (instancetype)initWithToken:(FBSDKAccessToken *)token
                   isCancelled:(BOOL)isCancelled
            grantedPermissions:(NSSet *)grantedPermissions
           declinedPermissions:(NSSet *)declinedPermissions {
   if ((self = [super init])) {
     _mutableLoggingExtras = [NSMutableDictionary dictionary];
-    _token = token ? [token copy] : nil;
+    _token = [token copy];
     _isCancelled = isCancelled;
     _grantedPermissions = [grantedPermissions copy];
     _declinedPermissions = [declinedPermissions copy];
@@ -40,7 +45,7 @@
 
 - (void)addLoggingExtra:(id)object forKey:(id<NSCopying>)key
 {
-  [FBSDKBasicUtility dictionary:_mutableLoggingExtras setObject:object forKey:key];
+  [FBSDKInternalUtility dictionary:_mutableLoggingExtras setObject:object forKey:key];
 }
 
 - (NSDictionary *)loggingExtras

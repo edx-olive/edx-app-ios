@@ -24,9 +24,9 @@ class VideoBlockViewControllerTests : SnapshotTestCase {
         let environment = TestRouterEnvironment()
         environment.mockCourseDataManager.querier = CourseOutlineQuerier(courseID: "some-course", outline: outline)
 
-        let controller = VideoBlockViewController(environment: environment, blockID: "video", courseID: "some-course")
-        inScreenNavigationContext(controller) {
-            assertSnapshotValidWithContent(controller.navigationController!)
+        let videoController = VideoBlockViewController(environment: environment, blockID: "video", courseID: "some-course")
+        inScreenNavigationContext(videoController) {
+            assertSnapshotValidWithContent(videoController.navigationController!)
         }
     }
 }

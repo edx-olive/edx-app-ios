@@ -16,16 +16,9 @@ class NetworkManager_AuthenticationTests : XCTestCase {
         let result = NetworkManager.invalidAccessAuthenticator(router: router, session: session, clientId: clientId, response: response, data: data)
         
         if waitForLogout {
-            let expectation = self.expectation(description: "wait for mock LogOut")
-
-            let removeable = NotificationCenter.default.oex_addObserver(observer: self, name: "MockLogOutCalled") { (_, _, _) in
-                expectation.fulfill()
-            }
-
+            expectation(for: NSPredicate(format:"self.logoutCalled == true"), evaluatedWith: router, handler: nil)
             waitForExpectations()
-            removeable.remove()
         }
-
         return result
     }
     

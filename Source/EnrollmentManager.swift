@@ -36,7 +36,7 @@ public class EnrollmentManager : NSObject {
         // from OEXInterface and remove these
         feed.output.listen(self) {[weak self] enrollments in
             enrollments.ifSuccess {
-                let courses = $0?.compactMap { $0.course } ?? []
+                let courses = $0?.flatMap { $0.course } ?? []
                 self?.interface?.setRegisteredCourses(courses)
                 self?.interface?.deleteUnregisteredItems()
                 self?.interface?.t_setCourseEnrollments($0 ?? [])

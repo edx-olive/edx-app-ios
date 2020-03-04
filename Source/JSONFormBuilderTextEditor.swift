@@ -22,7 +22,13 @@ class JSONFormBuilderTextEditorViewController: UIViewController {
         
         textView.textContainer.lineFragmentPadding = 0
         textView.textContainerInset = OEXStyles.shared().standardTextViewInsets
-        textView.typingAttributes = OEXStyles.shared().textAreaBodyStyle.attributes.attributedKeyDictionary()
+        
+        var typingAttributes = [String: Any]()
+        for (key, value) in OEXStyles.shared().textAreaBodyStyle.attributes {
+            typingAttributes[key.rawValue] = value
+        }
+
+        textView.typingAttributes = typingAttributes
         textView.placeholderTextColor = OEXStyles.shared().neutralBase()
         textView.textColor = OEXStyles.shared().neutralBlackT()
 
@@ -53,7 +59,7 @@ class JSONFormBuilderTextEditorViewController: UIViewController {
         }
     }
     
-    override func willMove(toParent parent: UIViewController?) {
+    override func willMove(toParentViewController parent: UIViewController?) {
         if parent == nil { //removing from the hierarchy
             doneEditing?(textView.text)
         }

@@ -8,10 +8,9 @@
 
 private let margin : CGFloat = 20
 
-import WebKit
 import edXCore
 
-class CourseCatalogDetailView : UIView {
+class CourseCatalogDetailView : UIView, UIWebViewDelegate {
 
     fileprivate struct Field {
         let name : String
@@ -28,7 +27,7 @@ class CourseCatalogDetailView : UIView {
     private let actionButton = SpinnerButton(type: .system)
     private let container : TZStackView
     private let insetContainer : TZStackView
-    private let descriptionView = WKWebView()
+    private let descriptionView = UIWebView()
     fileprivate let fieldsList = TZStackView()
     fileprivate let playButton = UIButton(type: .system)
     
@@ -81,7 +80,7 @@ class CourseCatalogDetailView : UIView {
         }
         
         insetContainer.layoutMarginsRelativeArrangement = true
-        insetContainer.layoutMargins = UIEdgeInsets.init(top: 0, left: margin, bottom: 0, right: margin)
+        insetContainer.layoutMargins = UIEdgeInsetsMake(0, margin, 0, margin)
         insetContainer.spacing = margin
         
         insetsController.addSource(source: topContentInsets)
@@ -97,8 +96,8 @@ class CourseCatalogDetailView : UIView {
             } )
             }, for: .touchUpInside)
         
-        descriptionView.scrollView.decelerationRate = UIScrollView.DecelerationRate.normal
-        descriptionView.navigationDelegate = self
+        descriptionView.scrollView.decelerationRate = UIScrollViewDecelerationRateNormal
+        descriptionView.delegate = self
         descriptionView.backgroundColor = OEXStyles.shared().standardBackgroundColor()
         
         playButton.setImage(Icon.CourseVideoPlay.imageWithFontSize(size: 60), for: .normal)
@@ -182,6 +181,21 @@ class CourseCatalogDetailView : UIView {
         return view
     }
     
+    func webViewDidFinishLoad(_ webView: UIWebView) {
+        self.setNeedsLayout()
+        self.layoutIfNeeded()
+        webView.scrollView.contentOffset = CGPoint(x: 0, y: -webView.scrollView.contentInset.top)
+        _loaded.send(())
+    }
+    
+    func webView(_ webView: UIWebView, shouldStartLoadWith request: URLRequest, navigationType: UIWebViewNavigationType) -> Bool {
+        if let URL = request.url, navigationType != .other {
+            UIApplication.shared.openURL(URL)
+            return false
+        }
+        return true
+    }
+    
     override func layoutSubviews() {
         super.layoutSubviews()
         self.topContentInsets.currentInsets = UIEdgeInsets(top: self.container.frame.height + StandardVerticalMargin, left: 0, bottom: 0, right: 0)
@@ -238,27 +252,6 @@ extension CourseCatalogDetailView {
                     UIApplication.shared.openURL(url as URL)
                 }
             }, for: .touchUpInside)
-    }
-}
-
-extension CourseCatalogDetailView: WKNavigationDelegate {
-    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        setNeedsLayout()
-        layoutIfNeeded()
-        webView.scrollView.contentOffset = CGPoint(x: 0, y: -webView.scrollView.contentInset.top)
-        _loaded.send(())
-    }
-
-    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-        if navigationAction.navigationType != .other {
-            if let URL = navigationAction.request.url, UIApplication.shared.canOpenURL(URL){
-                UIApplication.shared.openURL(URL)
-            }
-            decisionHandler(.cancel)
-            return
-        }
-
-        decisionHandler(.allow)
     }
 }
 

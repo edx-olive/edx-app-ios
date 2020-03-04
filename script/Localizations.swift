@@ -71,14 +71,13 @@ func == (left : Key, right : Key) -> Bool {
     return left.path == right.path && left.name == right.name
 }
 
-struct Key : Hashable {
+struct Key : Hashable, Equatable {
     let path : [String]
     let name : String
     let original : String
-
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(name)
-        hasher.combine(path.reduce(0) {$0 ^ $1.hashValue})
+    
+    var hashValue : Int {
+        return name.hashValue ^ path.reduce(0) {$0 ^ $1.hashValue}
     }
 }
 
@@ -152,25 +151,25 @@ extension Item {
             
             switch plurality {
             case .single:
-                return "@objc static func \(variableName(key.name))(\(args)) -> String { return OEXLocalizedString(\"\(key.original)\", nil).oex_format(withParameters: [\(formatParams)]) }"
+                return "static func \(variableName(key.name))(\(args)) -> String { return OEXLocalizedString(\"\(key.original)\", nil).oex_format(withParameters: [\(formatParams)]) }"
             case .multi:
                 if arguments.count == 1 {
                     let arg = arguments[0]
                     let name = variableName(arg)
-                    return "@objc static func \(variableName(key.name))(\(name) : Int, formatted : String? = nil) -> String { return OEXLocalizedStringPlural(\"\(key.name)\", \(name), nil).oex_format(withParameters: [\"\(arg)\": formatted ?? \(name).description]) }"
+                    return "static func \(variableName(key.name))(\(name) : Int, formatted : String? = nil) -> String { return OEXLocalizedStringPlural(\"\(key.name)\", \(name), nil).oex_format(withParameters: [\"\(arg)\": formatted ?? \(name).description]) }"
                     
                 }
                 else {
-                    return "@objc static func \(variableName(key.name))(\(args)) -> ((Int) -> String) { return {pluralizingCount in OEXLocalizedStringPlural(\"\(key.name)\", pluralizingCount, nil).oex_format(withParameters: [\(formatParams)]) }}"
+                    return "static func \(variableName(key.name))(\(args)) -> ((Int) -> String) { return {pluralizingCount in OEXLocalizedStringPlural(\"\(key.name)\", pluralizingCount, nil).oex_format(withParameters: [\(formatParams)]) }}"
                 }
             }
         }
         else {
             switch plurality {
             case .single:
-                return "@objc static var \(variableName(key.name)) = OEXLocalizedString(\"\(key.original)\", nil)"
+                return "static var \(variableName(key.name)) = OEXLocalizedString(\"\(key.original)\", nil)"
             case .multi:
-                return "@objc static func \(variableName(key.name))(count : Int) -> String { return OEXLocalizedStringPlural(\"\(key.name)\", count, nil) } "
+                return "static func \(variableName(key.name))(count : Int) -> String { return OEXLocalizedStringPlural(\"\(key.name)\", count, nil) } "
             }
         }
     }

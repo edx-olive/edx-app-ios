@@ -49,6 +49,8 @@ typedef void (^ DownloadVideosCompletionHandler)(BOOL cancelled);
 
 @property (nonatomic, weak, nullable) id <OEXStorageInterface>  storage;
 
+// [String(Course.video_outline) : OEXHelperVideoDownload]
+// TODO: Make this indexed by courseID instead of course.video_outline
 @property (nullable, nonatomic, strong, readonly) NSMutableDictionary* courseVideos;
 
 //Reachability
@@ -80,7 +82,10 @@ typedef void (^ DownloadVideosCompletionHandler)(BOOL cancelled);
 
 + (void)setCCSelectedPlaybackSpeed:(OEXVideoSpeed) speed;
 + (OEXVideoSpeed)getCCSelectedPlaybackSpeed;
-+ (float) getOEXVideoSpeed:(OEXVideoSpeed) speed; 
++ (float) getOEXVideoSpeed:(OEXVideoSpeed) speed;
+
+#pragma mark Last Accessed
+- (OEXHelperVideoDownload* _Nullable)lastAccessedSubsectionForCourseID:(NSString*)courseID;
 
 #pragma mark Video Management
 /// videos is an array of OEXVideoSummary
@@ -119,8 +124,7 @@ typedef void (^ DownloadVideosCompletionHandler)(BOOL cancelled);
 - (void)deleteDownloadedVideo:(OEXHelperVideoDownload *)video shouldNotify:(BOOL) shouldNotify completionHandler:(void (^)(BOOL success))completionHandler;
 - (void)deleteDownloadedVideos:(NSArray *)videos completionHandler:(void (^)(BOOL success))completionHandler;
 
-- (VideoData*)videoDataForVideoID:(NSString*)videoID;
-- (VideoData* _Nullable)insertVideoData:(OEXHelperVideoDownload*)helperVideo;
+- (VideoData*)insertVideoData:(OEXHelperVideoDownload*)helperVideo;
 
 #pragma mark- For Refresh of all Courses.
 - (void)setAllEntriesUnregister;
@@ -133,19 +137,19 @@ typedef void (^ DownloadVideosCompletionHandler)(BOOL cancelled);
 - (OEXDownloadState)downloadStateForVideoWithID:(nullable NSString*)videoID;
 - (OEXPlayedState)watchedStateForVideoWithID:(nullable NSString*)videoID;
 - (float)lastPlayedIntervalForVideo:(OEXHelperVideoDownload*)video;
-- (void)markVideoState:(OEXPlayedState)state forVideoID:(NSString*)videoID;
 - (void)markVideoState:(OEXPlayedState)state forVideo:(OEXHelperVideoDownload*)video;
 - (void)markLastPlayedInterval:(float)playedInterval forVideo:(OEXHelperVideoDownload*)video;
-- (void)markLastPlayedInterval:(float)playedInterval forVideoID:(NSString*)videoId;
 
 #pragma mark - Closed Captioning
 - (void)downloadAllTranscriptsForVideo:(nullable OEXHelperVideoDownload*)obj;
 
 #pragma mark - Update Last Accessed from server
+- (void)updateLastVisitedModule:(NSString*)module forCourseID:(NSString*)courseID;
+- (void)getLastVisitedModuleForCourseID:(NSString*)courseID;
 - (void)activateInterfaceForUser:(OEXUserDetails*)user;
 
 #pragma mark - Analytics Call
-- (void)sendAnalyticsEvents:(OEXVideoState)state withCurrentTime:(NSTimeInterval)currentTime forVideo:(nullable OEXHelperVideoDownload*)video playMedium:(nullable NSString *)playMedium;
+- (void)sendAnalyticsEvents:(OEXVideoState)state withCurrentTime:(NSTimeInterval)currentTime forVideo:(nullable OEXHelperVideoDownload*)video;
 
 #pragma mark - Course Enrollments
 /** Finds the user's enrollment for a course */

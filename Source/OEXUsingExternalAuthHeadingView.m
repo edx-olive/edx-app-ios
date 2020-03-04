@@ -101,13 +101,17 @@ static const UIEdgeInsets OEXUsingExternalAuthMessageInsets = {.top = 10, .left 
 }
 
 - (NSAttributedString*)messageTextWithProvider:(NSString*)provider {
-    OEXTextStyle* style = self.styles.headingMessageProviderStyle;
+    //OEXTextStyle* style = self.styles.headingMessageProviderStyle;
     NSString* platform = [[OEXConfig sharedConfig] platformName];
-    NSAttributedString*(^template)(NSAttributedString*) = [style applyWithF:^(NSString* service) {
-        return [Strings completeRegistrationInfoWithService:service platformName:platform];
-    }];
+    
+    //TODO: nathan
     NSAttributedString* serviceString = [self.styles.headingMessageProviderStyle attributedStringWithText:provider];
-    return template(serviceString);
+    return [[NSAttributedString alloc] initWithString:[Strings completeRegistrationInfoWithService:serviceString.string platformName:platform]];
+//    NSAttributedString*(^template)(NSAttributedString*) = [style applyWithF:^(NSString* service) {
+//        return [Strings completeRegistrationInfoWithService:service platformName:platform];
+//    }];
+//    NSAttributedString* serviceString = [self.styles.headingMessageProviderStyle attributedStringWithText:provider];
+//    return template(serviceString);
 }
 
 @end

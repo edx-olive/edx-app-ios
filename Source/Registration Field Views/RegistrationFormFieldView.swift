@@ -38,9 +38,15 @@ class RegistrationFormFieldView: UIView {
     }()
     
     // Used in child class
-    @objc lazy var textInputField: LogistrationTextField = {
+    lazy var textInputField: LogistrationTextField = {
         let textField = LogistrationTextField()
-        textField.defaultTextAttributes = OEXStyles.shared().textFieldStyle(with: .base).attributes.attributedKeyDictionary()
+        
+        var defaultTextAttributes = [String: Any]()
+        for (key, value) in OEXStyles.shared().textFieldStyle(with: .base).attributes {
+            defaultTextAttributes[key.rawValue] = value
+        }
+
+        textField.defaultTextAttributes = defaultTextAttributes
         textField.autocapitalizationType = .none
         textField.autocorrectionType = .no
         textField.addTarget(self, action: #selector(RegistrationFormFieldView.valueDidChange), for: .editingChanged)
@@ -88,7 +94,7 @@ class RegistrationFormFieldView: UIView {
         }
     }
     
-    var currentValue: String {
+    @objc var currentValue: String {
         let value = isInputTypeTextArea ? textInputArea.text : textInputField.text
         return value?.trimmingCharacters(in: NSCharacterSet.whitespaces) ?? ""
     }
@@ -117,7 +123,7 @@ class RegistrationFormFieldView: UIView {
         super.init(coder: aDecoder)
     }
     
-    @objc init(with formField: OEXRegistrationFormField) {
+    init(with formField: OEXRegistrationFormField) {
         super.init(frame: CGRect.zero)
         self.formField = formField
         loadView()

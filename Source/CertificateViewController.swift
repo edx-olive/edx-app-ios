@@ -7,15 +7,14 @@
 //
 
 import Foundation
-import WebKit
 
-class CertificateViewController: UIViewController, InterfaceOrientationOverriding {
+class CertificateViewController: UIViewController, UIWebViewDelegate, InterfaceOrientationOverriding {
 
     typealias Environment = OEXAnalyticsProvider & OEXConfigProvider & OEXStylesProvider
     private let environment: Environment
 
     private let loadController = LoadStateViewController()
-    let webView = WKWebView()
+    let webView = UIWebView()
     var request: NSURLRequest?
     private let shareButton = UIButton(frame: CGRect(x: 0, y: 0, width: 26, height: 26))
 
@@ -39,7 +38,7 @@ class CertificateViewController: UIViewController, InterfaceOrientationOverridin
             make.edges.equalTo(safeEdges)
         }
 
-        webView.navigationDelegate = self
+        webView.delegate = self
 
         loadController.setupInController(controller: self, contentView: webView)
         webView.backgroundColor = OEXStyles.shared().standardBackgroundColor()
@@ -54,7 +53,7 @@ class CertificateViewController: UIViewController, InterfaceOrientationOverridin
         environment.analytics.trackScreen(withName: OEXAnalyticsScreenCertificate)
         addShareButton()
         if let request = self.request {
-            webView.load(request as URLRequest)
+            webView.loadRequest(request as URLRequest)
         }
     }
 
@@ -95,18 +94,18 @@ class CertificateViewController: UIViewController, InterfaceOrientationOverridin
         self.request = mutableRequest
     }
 
-    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
-        return UIInterfaceOrientationMask.allButUpsideDown
+
+    // MARK: - Web view delegate
+
+    func webView(_ webView: UIWebView, didFailLoadWithError error: Error) {
+        loadController.state = LoadState.failed(error: error as NSError)
     }
 
-}
-
-extension CertificateViewController : WKNavigationDelegate {
-    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+    func webViewDidFinishLoad(_ webView: UIWebView) {
         loadController.state = .Loaded
     }
 
-    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        loadController.state = LoadState.failed(error: error as NSError)
+    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+        return UIInterfaceOrientationMask.allButUpsideDown
     }
 }

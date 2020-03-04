@@ -14,6 +14,5 @@ class MockRouter: OEXRouter {
 
     override func logout() {
         logoutCalled = true
-        NotificationCenter.default.post(Notification(name: Notification.Name(rawValue: "MockLogOutCalled")))
     }
 }

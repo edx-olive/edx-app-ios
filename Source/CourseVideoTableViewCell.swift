@@ -57,7 +57,7 @@ class CourseVideoTableViewCell: SwipeableCell, CourseBlockContainerCell {
         }
     }
     
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         contentView.addSubview(content)
         content.snp.makeConstraints { make in
@@ -109,8 +109,6 @@ class CourseVideoTableViewCell: SwipeableCell, CourseBlockContainerCell {
             content.leadingIconColor = OEXStyles.shared().primaryBaseColor()
         case .watched:
             content.leadingIconColor = OEXStyles.shared().neutralDark()
-        @unknown default:
-            break
         }
         
         guard !(self.localState?.summary?.onlyOnWeb ?? false) else {

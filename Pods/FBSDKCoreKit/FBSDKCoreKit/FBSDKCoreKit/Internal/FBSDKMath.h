@@ -19,13 +19,7 @@
 #import <CoreGraphics/CoreGraphics.h>
 #import <Foundation/Foundation.h>
 
-NS_ASSUME_NONNULL_BEGIN
-
-NS_SWIFT_NAME(Math)
 @interface FBSDKMath : NSObject
-
-- (instancetype)init NS_UNAVAILABLE;
-+ (instancetype)new NS_UNAVAILABLE;
 
 + (CGPoint)ceilForPoint:(CGPoint)value;
 + (CGSize)ceilForSize:(CGSize)value;
@@ -42,5 +36,3 @@ NS_SWIFT_NAME(Math)
 + (NSUInteger)hashWithPointer:(const void *)value;
 
 @end
-
-NS_ASSUME_NONNULL_END

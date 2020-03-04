@@ -29,10 +29,10 @@ class UserAgentGenerationOperation : OEXOperation {
     
     static var appVersionDescriptor : String {
         let bundle = Bundle.main
-        let components = [bundle.oex_appName(), bundle.bundleIdentifier, bundle.oex_buildVersionString()].compactMap{ return $0 }
+        let components = [bundle.oex_appName(), bundle.bundleIdentifier, bundle.oex_buildVersionString()].flatMap{ return $0 }
         return components.joined(separator: "/")
     }
-
+    
     override func performWithDoneAction(_ doneAction: @escaping () -> Void) {
         DispatchQueue.main.async { () -> Void in
             guard let webView = self.webView else {
@@ -52,7 +52,7 @@ class UserAgentGenerationOperation : OEXOperation {
 }
 
 class UserAgentOverrideOperation : OEXOperation {
-
+    
     override func performWithDoneAction(_ doneAction: @escaping () -> Void) {
         DispatchQueue.main.async {
             let operation = UserAgentGenerationOperation()
@@ -60,13 +60,14 @@ class UserAgentOverrideOperation : OEXOperation {
                 { agent in
                     UserDefaults.standard.register(defaults: ["UserAgent": agent])
                     doneAction()
-            }, failure: {error in
-                Logger.logError(NetworkManager.NETWORK, "Unable to load user agent: \(error.localizedDescription)")
-                doneAction()
-            }
+                }, failure: {error in
+                    Logger.logError(NetworkManager.NETWORK, "Unable to load user agent: \(error.localizedDescription)")
+                    doneAction()
+                }
             )
             OperationQueue.current?.addOperation(operation)
         }
+        
     }
     
     @objc static func overrideUserAgent(completion : (() -> Void)? = nil) {

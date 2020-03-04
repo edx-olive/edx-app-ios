@@ -25,8 +25,8 @@ extension String {
         var startPosition = encodedString.startIndex
         
         while let matchingRegexRange = encodedString.range(of: "(&#?[a-zA-Z0-9]+;)", options: .regularExpression, range: startPosition ..< encodedString.endIndex, locale: nil) {
-            let encodedText = String(encodedString[matchingRegexRange.lowerBound ..< matchingRegexRange.upperBound])
-            let decodedText = encodedText.removingHTMLEntities
+            let encodedText = encodedString[matchingRegexRange.lowerBound ..< matchingRegexRange.upperBound]
+            let decodedText = String(encodedText).removingHTMLEntities
             if  decodedText != encodedText {
                 encodedString.replaceSubrange(matchingRegexRange.lowerBound ..< matchingRegexRange.upperBound, with: decodedText)
                 startPosition = matchingRegexRange.lowerBound
@@ -58,11 +58,11 @@ extension String {
                 break
             }
 
-            let decodableString = String(self[delimiterRange.upperBound ..< semicolonRange.lowerBound])
+            let decodableString = self[delimiterRange.upperBound ..< semicolonRange.lowerBound]
             let replacementString: String
 
             if decodableString.hasPrefix("#") {
-                guard let decodedNumber = decodableString.decodeAsNumber else {
+                guard let decodedNumber = String(decodableString).decodeAsNumber else {
                     result += self[delimiterRange.lowerBound ..< semicolonRange.upperBound]
                     cursorPosition = semicolonRange.upperBound
                     continue
@@ -72,7 +72,7 @@ extension String {
 
             } else {
 
-                guard let decodedCharacter = HTMLDecodingTable[decodableString] else {
+                guard let decodedCharacter = HTMLDecodingTable[String(decodableString)] else {
                     result += self[delimiterRange.lowerBound ..< semicolonRange.upperBound]
                     cursorPosition = semicolonRange.upperBound
                     continue

@@ -1,1 +1,1 @@
-../../../Analytics/Analytics/Classes/Integrations/SEGIntegrationFactory.h
+../../../Analytics/Pod/Classes/Integrations/SEGIntegrationFactory.h

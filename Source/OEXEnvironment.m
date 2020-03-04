@@ -11,6 +11,7 @@
 #import "OEXEnvironment.h"
 #import "OEXFabricConfig.h"
 #import <Analytics/SEGAnalytics.h>
+#import <Segment-GoogleAnalytics/SEGGoogleAnalyticsIntegrationFactory.h>
 #import "OEXAnalytics.h"
 #import "OEXConfig.h"
 #import "OEXInterface.h"
@@ -65,14 +66,15 @@
             OEXAnalytics* analytics = [[OEXAnalytics alloc] init];
             OEXSegmentConfig* segmentConfig = [env.config segmentConfig];
             if(segmentConfig.apiKey != nil && segmentConfig.isEnabled) {
+                [[SEGAnalyticsConfiguration configurationWithWriteKey:segmentConfig.apiKey] use:[SEGGoogleAnalyticsIntegrationFactory instance]];
                 [analytics addTracker:[[SegmentAnalyticsTracker alloc] init]];
             }
             
-            if (env.config.firebaseConfig.enabled && env.config.firebaseConfig.isAnalyticsSourceFirebase) {
+            if (env.config.firebaseConfig.analyticsEnabled) {
                 [analytics addTracker:[[FirebaseAnalyticsTracker alloc] init]];
             }
             
-            if((segmentConfig.apiKey != nil && segmentConfig.isEnabled) || (env.config.firebaseConfig.enabled && env.config.firebaseConfig.isAnalyticsSourceFirebase)) {
+            if((segmentConfig.apiKey != nil && segmentConfig.isEnabled) || env.config.firebaseConfig.analyticsEnabled) {
                 [analytics addTracker:[[LoggingAnalyticsTracker alloc] init]];
             }
             
@@ -90,8 +92,14 @@
             if(env.config.pushNotificationsEnabled) {
                 OEXPushNotificationManager* manager = [[OEXPushNotificationManager alloc] initWithSettingsManager:env.dataManager.pushSettings];
                 [manager addProvidersForConfiguration:env.config withSession:env.session];
-                [manager addListenersForConfiguration:env.config environment:env.router.environment];
-
+                
+                if(env.config.pushNotificationsEnabled) {
+                    [env.postSetupActions addObject:^(OEXEnvironment* env) {
+                        OEXPushNotificationProcessorEnvironment* pushEnvironment = [[OEXPushNotificationProcessorEnvironment alloc] initWithAnalytics:env.analytics router:env.router];
+                        [env.pushNotificationManager addListener:[[OEXPushNotificationProcessor alloc] initWithEnvironment:pushEnvironment]];
+                    }];
+                }
+                
                 return manager;
             }
             else {
@@ -179,9 +187,10 @@
     
     self.networkManager = self.networkManagerBuilder(self);
     self.dataManager = self.dataManagerBuilder(self);
+    self.pushNotificationManager = self.pushNotificationManagerBuilder(self);
+    
     self.styles = self.stylesBuilder(self);
     self.router = self.routerBuilder(self);
-    self.pushNotificationManager = self.pushNotificationManagerBuilder(self);
     
     // We should minimize the use of these singletons and mostly use explicitly passed in dependencies
     // But occasionally that's very inconvenient and also much existing code is not structured to deal with that

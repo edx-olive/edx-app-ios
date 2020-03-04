@@ -44,7 +44,7 @@ class CourseOutlineTableController : UITableViewController, CourseVideoTableView
         self.courseBlockID = courseBlockID
         self.environment = environment
         self.courseOutlineMode = mode
-        self.courseQuerier = environment.dataManager.courseDataManager.querierForCourseWithID(courseID: courseID, environment: environment)
+        self.courseQuerier = environment.dataManager.courseDataManager.querierForCourseWithID(courseID: courseID)
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -151,7 +151,7 @@ class CourseOutlineTableController : UITableViewController, CourseVideoTableView
         }
         if let highlightID = highlightedBlockID, let indexPath = indexPathForBlockWithID(blockID: highlightID)
         {
-            tableView.scrollToRow(at: indexPath as IndexPath, at: UITableView.ScrollPosition.middle, animated: false)
+            tableView.scrollToRow(at: indexPath as IndexPath, at: UITableViewScrollPosition.middle, animated: false)
         }
         
         if courseOutlineMode == .video {
@@ -371,7 +371,7 @@ extension UITableView {
     func setAndLayoutTableHeaderView(header: UIView) {
         header.setNeedsLayout()
         header.layoutIfNeeded()
-        let size = header.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
+        let size = header.systemLayoutSizeFitting(UILayoutFittingCompressedSize)
         header.frame = CGRect(x: 0, y: 0, width: size.width, height: size.height)
         tableHeaderView = header
     }

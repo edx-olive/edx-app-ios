@@ -19,15 +19,15 @@ private enum TabBarOptions: Int {
         case .Program:
             return Strings.programs
         case .CourseCatalog:
-            return config?.discovery.course.type == .native ? Strings.findCourses : Strings.discover
+            return config?.courseEnrollmentConfig.type == .Native ? Strings.findCourses : Strings.discover
         case .Debug:
             return Strings.debug
         }
     }
 }
 
-class EnrolledTabBarViewController: UITabBarController, UITabBarControllerDelegate, InterfaceOrientationOverriding, ChromeCastConnectedButtonDelegate {
-    
+class EnrolledTabBarViewController: UITabBarController, UITabBarControllerDelegate, InterfaceOrientationOverriding {
+
     typealias Environment = OEXAnalyticsProvider & OEXConfigProvider & DataManagerProvider & NetworkManagerProvider & OEXRouterProvider & OEXInterfaceProvider & ReachabilityProvider & OEXSessionProvider & OEXStylesProvider
     
     fileprivate let environment: Environment
@@ -66,7 +66,7 @@ class EnrolledTabBarViewController: UITabBarController, UITabBarControllerDelega
         prepareTabViewData()
         delegate = self
     }
-    
+
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
@@ -93,9 +93,8 @@ class EnrolledTabBarViewController: UITabBarController, UITabBarControllerDelega
                 item = TabBarItem(title: option.title(), viewController: ProgramsViewController(environment: environment, programsURL: programsURL), icon: Icon.Clone, detailText: Strings.Dashboard.courseCourseDetail)
                 tabBarItems.append(item)
             case .CourseCatalog:
-                guard let router = environment.router,
-                    let discoveryController = router.discoveryViewController() else { break }
-                item = TabBarItem(title: option.title(config: environment.config), viewController: discoveryController, icon: Icon.Discovery, detailText: Strings.Dashboard.courseCourseDetail)
+                guard environment.config.courseEnrollmentConfig.isCourseDiscoveryEnabled(), let router = environment.router else { break }
+                item = TabBarItem(title: option.title(config: environment.config), viewController: router.discoveryViewController(), icon: Icon.Discovery, detailText: Strings.Dashboard.courseCourseDetail)
                 tabBarItems.append(item)
                 EnrolledTabBarViewController.courseCatalogIndex = tabBarItems.count - 1
             case .Debug:
@@ -164,7 +163,7 @@ class EnrolledTabBarViewController: UITabBarController, UITabBarControllerDelega
             
             profileButton.oex_addAction({[weak self] _  in
                 guard let currentUserName = self?.environment.session.currentUser?.username else { return }
-                self?.environment.router?.showProfileForUsername(controller: self, username: currentUserName, modal: true)
+                self?.environment.router?.showProfileForUsername(controller: self, username: currentUserName, modalTransitionStylePresent: true)
             }, for: .touchUpInside)
             
             navigationItem.leftBarButtonItem = UIBarButtonItem(customView: profileView)
@@ -176,27 +175,22 @@ class EnrolledTabBarViewController: UITabBarController, UITabBarControllerDelega
         accountButton.accessibilityLabel = Strings.userAccount
         accountButton.accessibilityIdentifier = "EnrolledTabBarViewController:account-button"
         navigationItem.rightBarButtonItem = accountButton
-
+        
         accountButton.oex_setAction { [weak self] in
             self?.environment.router?.showAccount(controller: self, modalTransitionStylePresent: true)
         }
     }
     
     // MARK: Deep Linking
-    @discardableResult
-    func switchTab(with type: DeepLinkType) -> UIViewController {
+    func switchTab(with type: DeepLinkType) {
         switch type {
-        case .program, .programDetail:
+        case .programs:
             selectedIndex = tabBarViewControllerIndex(with: ProgramsViewController.self)
-        case .courseDiscovery, .courseDetail, .programDiscovery, .programDiscoveryDetail, .degreeDiscovery, .degreeDiscoveryDetail:
-            selectedIndex = tabBarViewControllerIndex(with: DiscoveryViewController.self)
         default:
             selectedIndex = 0
             break
         }
         navigationItem.title = titleOfViewController(index: selectedIndex)
-        
-        return tabBarItems[selectedIndex].viewController
     }
 }
 

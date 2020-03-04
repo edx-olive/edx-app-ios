@@ -1,1 +1,1 @@
-../../../FirebaseInstanceID/Firebase/InstanceID/Public/FIRInstanceID.h
+../../../FirebaseInstanceID/Sources/FIRInstanceID.h

@@ -23,7 +23,7 @@ class WhatsNewViewControllerTests: SnapshotTestCase {
     
     func testUIPageControllerInitilization() {
         let controller = whatsnewController()
-        XCTAssertNotNil(controller.children[0])
+        XCTAssertNotNil(controller.childViewControllers[0])
     }
     
     func testScreenshot() {

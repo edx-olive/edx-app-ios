@@ -16,7 +16,7 @@ class UserProfileView : UIView, UIScrollViewDelegate {
         }
         override func drawText(in rect: CGRect) {
             let newRect = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
-            super.drawText(in: rect.inset(by: newRect))
+            super.drawText(in: UIEdgeInsetsInsetRect(rect, newRect))
         }
     }
     typealias Environment =  OEXSessionProvider & OEXStylesProvider
@@ -221,17 +221,10 @@ class UserProfileView : UIView, UIScrollViewDelegate {
             }
             if let bio = profile.bio {
                 bioText.attributedText = bioStyle.attributedString(withText: bio)
-                bioText.isAccessibilityElement = true
-                bioText.accessibilityLabel = Strings.Accessibility.Account.bioLabel
-
             } else {
                 let message = messageStyle.attributedString(withText: Strings.Profile.noBio)
                 bioSystemMessage.attributedText = message
                 bioSystemMessage.isHidden = false
-                let accessibilityLabelText = "\(Strings.Accessibility.Account.bioLabel), \(Strings.Profile.noBio)"
-                bioSystemMessage.accessibilityLabel = accessibilityLabelText
-                bioSystemMessage.isAccessibilityElement = true
-                bioText.isAccessibilityElement = false
             }
         }
 

@@ -22,18 +22,15 @@
 
 #import "FBSDKIcon.h"
 
-NS_SWIFT_NAME(FBButtonImpressionTracking)
 @protocol FBSDKButtonImpressionTracking <NSObject>
 
-@property (nonatomic, readonly, copy) NSDictionary<NSString *, id> *analyticsParameters;
-@property (nonatomic, readonly, copy) NSString *impressionTrackingEventName;
-@property (nonatomic, readonly, copy) NSString *impressionTrackingIdentifier;
+- (NSDictionary *)analyticsParameters;
+- (NSString *)impressionTrackingEventName;
+- (NSString *)impressionTrackingIdentifier;
 
 @end
 
 @interface FBSDKButton ()
-
-@property (nonatomic, readonly, getter=isImplicitlyDisabled) BOOL implicitlyDisabled;
 
 - (void)logTapEventWithEventName:(NSString *)eventName
                       parameters:(NSDictionary *)parameters;
@@ -57,6 +54,7 @@ NS_SWIFT_NAME(FBButtonImpressionTracking)
 - (UIColor *)defaultHighlightedColor;
 - (FBSDKIcon *)defaultIcon;
 - (UIColor *)defaultSelectedColor;
+- (BOOL)isImplicitlyDisabled;
 - (CGSize)sizeThatFits:(CGSize)size title:(NSString *)title;
 
 @end

@@ -9,11 +9,12 @@
 class YoutubeVideoPlayer: VideoPlayer {
 
     let playerView: WKYTPlayerView
-    var videoID: String = ""
-    private var videoCurrentTime: Float = 0.0
+    var videoId: String
     let barTintColor: UIColor
-
-    private struct playerVars {
+    private var videoCurrentTime: Float
+    var transcripts: [AnyHashable: Any]
+    
+    private struct playVars {
         var playsinline = 0
         var start = 0
         var value: [String:Int] {
@@ -30,14 +31,17 @@ class YoutubeVideoPlayer: VideoPlayer {
     }
 
     override var currentTime: TimeInterval {
-        playerView.getCurrentTime({ [weak self] (time, nil) in
-            self?.videoCurrentTime = time
+        playerView.getCurrentTime({ (time, nil) in
+            self.videoCurrentTime = time
         })
         return Double(videoCurrentTime)
     }
     override init(environment : Environment) {
         playerView = WKYTPlayerView()
+        videoId = String()
         barTintColor = UINavigationBar.appearance().barTintColor ?? environment.styles.navigationItemTintColor()
+        videoCurrentTime = Float()
+        transcripts = Dictionary<AnyHashable,Any>()
         super.init(environment: environment)
         playerView.delegate = self
     }
@@ -51,6 +55,12 @@ class YoutubeVideoPlayer: VideoPlayer {
         createYoutubePlayer()
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        playerView.stopVideo()
+        UINavigationBar.appearance().barTintColor = barTintColor
+    }
+    
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         playerView.stopVideo()
@@ -61,6 +71,11 @@ class YoutubeVideoPlayer: VideoPlayer {
         loadingIndicatorView.startAnimating()
         UINavigationBar.appearance().barTintColor = .black
         view.addSubview(playerView)
+        t_captionLanguage = String(Locale.preferredLanguages[0].prefix(2))
+    }
+    
+    func setCaption(language: String){
+        t_captionLanguage = language
     }
 
     func setVideoPlayerMode(isPortrait: Bool) {
@@ -74,34 +89,31 @@ class YoutubeVideoPlayer: VideoPlayer {
         }
     }
 
-    override func play(video: OEXHelperVideoDownload, time: TimeInterval? = nil) {
+    override func play(video: OEXHelperVideoDownload) {
         super.setVideo(video: video)
+        self.transcripts = (video.summary?.transcripts)!
         guard let videoUrl = video.summary?.videoURL, let url = URLComponents(string : videoUrl) else {
             Logger.logError("YOUTUBE_VIDEO", "invalid url")
-            showErrorMessage(message: Strings.youtubeInvalidUrlError)
+            self.showErrorMessage(message: "The video could not loaded, invalid url")
+            loadingIndicatorView.stopAnimating()
             return
         }
 
-        let playerVars = YoutubeVideoPlayer.playerVars(playsinline: 1, start: 0)
-        guard let videoID = url.queryItems?.first?.value else {
-            Logger.logError("YOUTUBE_VIDEO", "invalid video ID")
-            showErrorMessage(message: Strings.youtubeInvalidUrlError)
+        let playvars = playVars(playsinline: 1, start: 0)
+        guard let id = url.queryItems?.first?.value else {
             return
         }
-        self.videoID = videoID
-        playerView.load(withVideoId: videoID, playerVars: playerVars.value)
+        videoId = id
+        playerView.load(withVideoId: videoId, playerVars: playvars.value)
     }
 
     override func setFullscreen(fullscreen: Bool, animated: Bool, with deviceOrientation: UIInterfaceOrientation, forceRotate rotate: Bool) {
         isFullScreen = fullscreen
-        let playerVars = YoutubeVideoPlayer.playerVars(playsinline: Int(truncating: NSNumber(value:!fullscreen)), start: Int(currentTime))
+        let playvars = playVars(playsinline: Int(truncating: NSNumber(value:!fullscreen)), start: Int(currentTime))
 
-        playerView.load(withVideoId: videoID, playerVars: playerVars.value)
+        playerView.load(withVideoId: videoId, playerVars: playvars.value)
         setVideoPlayerMode(isPortrait: !fullscreen)
-        
-        if let courseId = video?.course_id, let unitUrl = video?.summary?.unitURL {
-            environment.analytics.trackVideoOrientation(videoID, courseID: courseId, currentTime: CGFloat(currentTime), mode: fullscreen, unitURL: unitUrl, playMedium: value_play_medium_youtube)
-        }
+
     }
 
     override func seek(to time: Double) {
@@ -109,21 +121,12 @@ class YoutubeVideoPlayer: VideoPlayer {
     }
     
     private func showErrorMessage(message : String) {
-        let label = UILabel()
-        label.textColor = .white
-        label.textAlignment = .center
-        
-        view.addSubview(label)
-        
-        let textStyle = OEXTextStyle(weight: .normal, size: .base, color: OEXStyles.shared().neutralWhite())
-        label.attributedText = textStyle.attributedString(withText: message)
-        
-        label.snp.remakeConstraints { (make) in
-            make.centerX.equalTo(view)
-            make.centerY.equalTo(view)
-        }
-
-        loadingIndicatorView.stopAnimating()
+        let screenSize: CGRect = UIScreen.main.bounds
+        let errorLabel = UILabel(frame: CGRect(x: 0, y:(screenSize.width * CGFloat(STANDARD_VIDEO_ASPECT_RATIO))/2 - 18 , width: screenSize.width, height: 36))
+        errorLabel.textColor = UIColor.white
+        errorLabel.textAlignment = .center;
+        errorLabel.text = message
+        self.view.addSubview(errorLabel)
     }
  }
 
@@ -134,19 +137,6 @@ extension YoutubeVideoPlayer: WKYTPlayerViewDelegate {
         setVideoPlayerMode(isPortrait: UIDevice.current.orientation.isPortrait)
         loadingIndicatorView.stopAnimating()
         playerView.playVideo()
-    }
-
-    func playerView(_ playerView: WKYTPlayerView, didChangeTo state: WKYTPlayerState) {
-        switch state {
-        case .paused:
-            environment.interface?.sendAnalyticsEvents(.pause, withCurrentTime: currentTime, forVideo: video, playMedium: value_play_medium_youtube)
-            break
-        case .playing:
-            environment.interface?.sendAnalyticsEvents(.play, withCurrentTime: currentTime, forVideo: video, playMedium: value_play_medium_youtube)
-            break
-        default:
-            break
-        }
     }
 
 }

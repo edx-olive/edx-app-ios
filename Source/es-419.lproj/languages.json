@@ -219,7 +219,8 @@
   "iu": "Inuktitut"
   },
   {
-  "ie": "Interlingue"
+  "value": "ie",
+  "name": "Interlingue"
   },
   {
   "ia": "Interlingua"

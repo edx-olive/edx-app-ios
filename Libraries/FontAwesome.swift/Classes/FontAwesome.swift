@@ -39,10 +39,10 @@ private class FontLoader {
         let data = try! Data(contentsOf: fontURL)
         
         let provider = CGDataProvider(data: data as CFData)
-        let font = CGFont(provider!)!
+        let font = CGFont(provider!)
         
         var error: Unmanaged<CFError>?
-        if !CTFontManagerRegisterGraphicsFont(font, &error) {
+        if !CTFontManagerRegisterGraphicsFont(font!, &error) {
             let errorDescription: CFString = CFErrorCopyDescription(error!.takeUnretainedValue())
             let nsError = error!.takeUnretainedValue() as AnyObject as! NSError
             NSException(name: NSExceptionName.internalInconsistencyException, reason: errorDescription as String, userInfo: [NSUnderlyingErrorKey: nsError]).raise()
@@ -51,7 +51,7 @@ private class FontLoader {
 }
 
 public extension UIFont {
-    class func fontAwesomeOfSize(fontSize: CGFloat) -> UIFont {
+    public class func fontAwesomeOfSize(fontSize: CGFloat) -> UIFont {
         let name = "FontAwesome"
         if UIFont.fontNames(forFamilyName: name).isEmpty {
             FontLoader.loadFont(name)
@@ -655,4 +655,10 @@ public enum FontAwesome: String {
   case Youtube = "\u{f167}"
   case YoutubePlay = "\u{f16a}"
   case Clone = "\u{f24d}"
+}
+
+public extension String {
+  public static func fontAwesomeIconWithName(name: FontAwesome) -> String {
+    return name.rawValue.substring(to: name.rawValue.index(name.rawValue.startIndex, offsetBy: 1))
+  }
 }

@@ -11,14 +11,14 @@ import Foundation
 private let StandardTolerance : CGFloat = 0.005
 
 protocol SnapshotTestable {
-    func snapshotTestWithCase(_ testCase : FBSnapshotTestCase, referenceImagesDirectory: String, imageDiffDirectory: String, identifier: String) throws
+    func snapshotTestWithCase(_ testCase : FBSnapshotTestCase, referenceImagesDirectory: String, identifier: String) throws
     
     var snapshotSize : CGSize { get }
 }
 
 extension UIView : SnapshotTestable {
-    func snapshotTestWithCase(_ testCase: FBSnapshotTestCase, referenceImagesDirectory: String, imageDiffDirectory: String, identifier: String) throws {
-        try testCase.compareSnapshot(of: self, referenceImagesDirectory: referenceImagesDirectory, imageDiffDirectory: imageDiffDirectory, identifier: identifier, overallTolerance: StandardTolerance)
+    func snapshotTestWithCase(_ testCase : FBSnapshotTestCase, referenceImagesDirectory: String, identifier: String) throws {
+        try testCase.compareSnapshot(of: self, referenceImagesDirectory: referenceImagesDirectory, identifier: identifier, tolerance : StandardTolerance)
     }
     
     var snapshotSize : CGSize {
@@ -27,8 +27,8 @@ extension UIView : SnapshotTestable {
 }
 
 extension CALayer : SnapshotTestable {
-    func snapshotTestWithCase(_ testCase: FBSnapshotTestCase, referenceImagesDirectory: String, imageDiffDirectory: String, identifier: String) throws {
-        try testCase.compareSnapshot(of: self, referenceImagesDirectory: referenceImagesDirectory, imageDiffDirectory: imageDiffDirectory, identifier: identifier, overallTolerance: StandardTolerance)
+    func snapshotTestWithCase(_ testCase : FBSnapshotTestCase, referenceImagesDirectory: String, identifier: String) throws  {
+        try testCase.compareSnapshot(of: self, referenceImagesDirectory: referenceImagesDirectory, identifier: identifier, tolerance : StandardTolerance)
     }
     
     var snapshotSize : CGSize {
@@ -44,9 +44,9 @@ extension UIViewController : SnapshotTestable {
         window.makeKeyAndVisible()
     }
     
-    func snapshotTestWithCase(_ testCase: FBSnapshotTestCase, referenceImagesDirectory: String, imageDiffDirectory: String, identifier: String) throws {
+    func snapshotTestWithCase(_ testCase: FBSnapshotTestCase, referenceImagesDirectory: String, identifier: String) throws {
 
-        try testCase.compareSnapshot(of: self.view, referenceImagesDirectory: referenceImagesDirectory, imageDiffDirectory: imageDiffDirectory, identifier: identifier, overallTolerance: StandardTolerance)
+        try testCase.compareSnapshot(of: self.view, referenceImagesDirectory: referenceImagesDirectory, identifier: identifier, tolerance : StandardTolerance)
     }
     
     func finishSnapshot() {
@@ -72,7 +72,7 @@ class SnapshotTestCase : FBSnapshotTestCase {
         // Standardize on a size so we don't have to worry about different simulators
         // etc.
         // Pick a non standard width so we can catch width assumptions.
-        return CGSize(width: 375, height: 667)
+        return CGSize(width: 380, height: 568)
     }
     
     fileprivate var majorVersion : Int {
@@ -98,7 +98,7 @@ class SnapshotTestCase : FBSnapshotTestCase {
         let qualifiedIdentifier = qualifyIdentifier(identifier, content : content)
         
         do {
-            try content.snapshotTestWithCase(self, referenceImagesDirectory: SNAPSHOT_TEST_DIR, imageDiffDirectory: SNAPSHOT_TEST_FAILURE_DIFF_DIR, identifier: qualifiedIdentifier)
+            try content.snapshotTestWithCase(self, referenceImagesDirectory: SNAPSHOT_TEST_DIR, identifier: qualifiedIdentifier)
         }
         catch let error as NSError {
             XCTFail("Snapshot comparison failed (\(qualifiedIdentifier)): \(error.localizedDescription )", file : file, line : line)

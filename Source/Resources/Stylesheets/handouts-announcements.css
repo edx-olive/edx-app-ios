@@ -1,5 +1,5 @@
 body {
-  font: -apple-system-body;
+  font: 16px/1.5 'Open Sans','Helvetica Neue', Helvetica, Arial, sans-serif;
   padding: 0px 20px 0px;
   margin: 0px;
 }
@@ -7,39 +7,38 @@ body {
 a, a:link {
   color: #1D9DD9;
   text-decoration: none;
-  font: -apple-system-body;
 }
 
 h1 {
-  font: -apple-system-headline;
+  font-size: 26px;
   font-weight: bold;
   line-height: 1.4em;
   margin-bottom: .5em;
 }
 
 h2 {
-  font: -apple-system-subheadline;
+  font-size: 24px;
   font-weight: bold;
   line-height: 1.4em;
   margin-bottom: .5em;
 }
 
 h3 {
-  font: -apple-system-subheadline;
+  font-size: 20px;
   font-weight: bold;
   line-height: 1.3em;
   margin-bottom: .5em;
 }
 
 h4 {
-  font: -apple-system-subheadline;
+  font-size: 18px;
   font-weight: bold;
   line-height: 1.3em;
   margin-bottom: .5em;
 }
 
 h5 {
-  font: -apple-system-subheadline;
+  font-size: 16px;
   font-weight: bold;
   line-height: 1.3em;
   margin-bottom: .5em;
@@ -48,7 +47,7 @@ h5 {
 
 
 p {
-  font: -apple-system-body;
+  font-size: 16px;
   line-height: 1.5em;
   margin: 0 0 15px 0;
   padding: 0px;
@@ -82,6 +81,7 @@ strong, b {
 
 .announcement-header {
   color: rgb(70, 74, 80);
+  font-size:16px;
   width : 100%;
   margin : 0px;
   padding : 10px 0px 0px 0px;

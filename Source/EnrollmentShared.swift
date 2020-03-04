@@ -11,6 +11,6 @@
     @objc static let successNotification = "OEXEnrollmentSuccessNotification"
     
     // This is an delay chosen semi-arbitrarily to ensure that any transition animation has completed
-    static let overlayMessageDelay : TimeInterval = 0.5
+    @objc static let overlayMessageDelay : TimeInterval = 0.5
 
 }

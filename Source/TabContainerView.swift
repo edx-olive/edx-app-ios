@@ -60,7 +60,7 @@ class TabContainerView : UIView {
                     showTabAtIndex(index: index)
                 }
             }
-            if control.selectedSegmentIndex == UISegmentedControl.noSegment && items.count > 0 {
+            if control.selectedSegmentIndex == UISegmentedControlNoSegment && items.count > 0 {
                 showTabAtIndex(index: 0)
             }
             else {
@@ -71,7 +71,7 @@ class TabContainerView : UIView {
     }
 
     private func showTabAtIndex(index: Int) {
-        guard index != UISegmentedControl.noSegment else {
+        guard index != UISegmentedControlNoSegment else {
             return
         }
 

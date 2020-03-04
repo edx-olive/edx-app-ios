@@ -38,7 +38,7 @@ class AgreementTextView: UITextView {
         let eulaText = Strings.Agreement.linkTextEula(platformName: platformName)
         let tosText = Strings.Agreement.linkTextTos(platformName: platformName)
         let privacyPolicyText = Strings.Agreement.linkTextPrivacyPolicy
-        let agreementText = "\(prefix)\(Strings.Agreement.text(eula: eulaText, tos: tosText, platformName: platformName, privacyPolicy: privacyPolicyText))"
+        let agreementText = "\(prefix)\(Strings.Agreement.text(eula: eulaText, tos: tosText, privacyPolicy: privacyPolicyText))"
         var attributedString = style.attributedString(withText: agreementText)
         if let eulaUrl = config?.agreementURLsConfig.eulaURL,
             let tosUrl = config?.agreementURLsConfig.tosURL,
@@ -56,7 +56,7 @@ class AgreementTextView: UITextView {
 }
 
 extension AgreementTextView: UITextViewDelegate {
-    func textView(_ textView: UITextView, shouldInteractWith URL: URL, in characterRange: NSRange) -> Bool {
+    @objc func textView(_ textView: UITextView, shouldInteractWith URL: URL, in characterRange: NSRange) -> Bool {
         agreementDelegate?.agreementTextView(self, didSelect: URL)
         return false
     }

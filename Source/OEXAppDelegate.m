@@ -7,8 +7,6 @@
 //
 
 @import edXCore;
-@import FirebaseAnalytics;
-@import GoogleCast;
 #import <Crashlytics/Crashlytics.h>
 #import <Fabric/Fabric.h>
 #import <FBSDKCoreKit/FBSDKCoreKit.h>
@@ -16,11 +14,12 @@
 #import <NewRelicAgent/NewRelic.h>
 #import <Analytics/SEGAnalytics.h>
 #import <Branch/Branch.h>
-#import <Segment-GoogleAnalytics/SEGGoogleAnalyticsIntegrationFactory.h>
-#import <Segment-Firebase/SEGFirebaseIntegrationFactory.h>
+
 #import "OEXAppDelegate.h"
+
 #import "edX-Swift.h"
 #import "Logger+OEXObjC.h"
+
 #import "OEXAuthentication.h"
 #import "OEXConfig.h"
 #import "OEXDownloadManager.h"
@@ -37,7 +36,6 @@
 #import "OEXRouter.h"
 #import "OEXSession.h"
 #import "OEXSegmentConfig.h"
-#import <MSAL/MSAL.h>
 
 @interface OEXAppDelegate () <UIApplicationDelegate>
 
@@ -74,10 +72,7 @@
     [[[ServerChangedChecker alloc] init] logoutIfServerChanged];
 
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    // Forcing app to run in Light mode because app isn't configured for dark mode
-    if (@available(iOS 13.0, *)) {
-        self.window.overrideUserInterfaceStyle = UIUserInterfaceStyleLight;
-    }
+    self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];
 
     [self setupGlobalEnvironment];
@@ -120,10 +115,6 @@
                                           annotation:options[UIApplicationOpenURLOptionsAnnotationKey]];
     }
     
-    if (self.environment.config.microsoftConfig.enabled) {
-        handled = [MSALPublicClientApplication handleMSALResponse:url];
-    }
-
     return handled;
 }
 
@@ -201,25 +192,14 @@
 
     //SegmentIO
     OEXSegmentConfig* segmentIO = [config segmentConfig];
-    if(segmentIO.isEnabled) {
-        SEGAnalyticsConfiguration * configuration = [SEGAnalyticsConfiguration configurationWithWriteKey:segmentIO.apiKey];
-        
-        //Segment to Google Analytics integration
-        [configuration use:[SEGGoogleAnalyticsIntegrationFactory instance]];
-        
-        if (config.firebaseConfig.requiredKeysAvailable && config.firebaseConfig.isAnalyticsSourceSegment) {
-            //Segment to Google Firebase integration
-            [configuration use:[SEGFirebaseIntegrationFactory instance]];
-        }
-        
-        [SEGAnalytics setupWithConfiguration:configuration];
+    if(segmentIO.apiKey && segmentIO.isEnabled) {
+        [SEGAnalytics setupWithConfiguration:[SEGAnalyticsConfiguration configurationWithWriteKey:segmentIO.apiKey]];
     }
+    
     //Initialize Firebase
-    // Make Sure the google app id is valid before configuring firebase, the app can produce crash.
-    //Firebase do not get exception with invalid google app ID, https://github.com/firebase/firebase-ios-sdk/issues/1581
-    if (config.firebaseConfig.enabled && !config.firebaseConfig.isAnalyticsSourceSegment) {
+    if (config.firebaseConfig.analyticsEnabled) {
         [FIRApp configure];
-        [FIRAnalytics setAnalyticsCollectionEnabled:YES];
+        [[FIRAnalyticsConfiguration sharedInstance] setAnalyticsCollectionEnabled:YES];
     }
 
     //NewRelic Initialization with edx key
@@ -234,18 +214,6 @@
     if(fabric.appKey && fabric.isEnabled) {
         [Fabric with:@[CrashlyticsKit]];
     }
-    
-    [self initilizeChromeCast];
-}
-
-- (void) initilizeChromeCast {
-    // Ideally this should be in ChromeCastManager but
-    // due to some weird SDK bug, chrome cast is not properly initializing from the swift classes.
-    GCKDiscoveryCriteria *criteria = [[GCKDiscoveryCriteria alloc] initWithApplicationID: kGCKDefaultMediaReceiverApplicationID];
-    GCKCastOptions *options = [[GCKCastOptions alloc] initWithDiscoveryCriteria:criteria];
-    [GCKCastContext setSharedInstanceWithOptions:options];
-    GCKCastContext.sharedInstance.useDefaultExpandedMediaControls = true;
-    [ChromeCastManager.shared configureWithEnvironment:self.environment.router.environment];
 }
 
 - (void) configureFabricKits:(NSDictionary*) launchOptions {

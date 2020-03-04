@@ -32,9 +32,7 @@ public class CourseOutlineQuerier : NSObject {
         public let block : CourseBlock
         public let children : [CourseBlock]
     }
-    
-    public typealias Environment = OEXConfigProvider
-    private var environment : Environment?
+
     
     public private(set) var courseID : String
     private let enrollmentManager: EnrollmentManager?
@@ -44,15 +42,12 @@ public class CourseOutlineQuerier : NSObject {
     private let courseOutline : BackedStream<CourseOutline> = BackedStream()
     public var needsRefresh : Bool = false
     
-    
-    public init(courseID : String, interface : OEXInterface?, enrollmentManager: EnrollmentManager?, networkManager : NetworkManager?, session : OEXSession?, environment: Environment) {
+    public init(courseID : String, interface : OEXInterface?, enrollmentManager: EnrollmentManager?, networkManager : NetworkManager?, session : OEXSession?) {
         self.courseID = courseID
         self.interface = interface
         self.enrollmentManager = enrollmentManager
         self.networkManager = networkManager
         self.session = session
-        self.environment = environment
-        
         super.init()
         addListener()
         addObservers()
@@ -119,7 +114,7 @@ public class CourseOutlineQuerier : NSObject {
                 courseOutline.backWithStream(stream)
             }
             else {
-                let request = CourseOutlineAPI.requestWithCourseID(courseID: courseID, username : session?.currentUser?.username, environment: environment as? RouterEnvironment)
+                let request = CourseOutlineAPI.requestWithCourseID(courseID: courseID, username : session?.currentUser?.username)
                 if let loader = networkManager?.streamForRequest(request, persistResponse: true) {
                     courseOutline.backWithStream(loader)
                 }
@@ -304,7 +299,7 @@ public class CourseOutlineQuerier : NSObject {
     private func childrenOfBlockWithID(blockID: CourseBlockID?, forMode mode: CourseOutlineMode, inOutline outline: CourseOutline) -> BlockGroup? {
         if let block = blockWithID(id: blockID ?? outline.root, inOutline: outline)
         {
-            let blocks = block.children.compactMap({ blockWithID(id: $0, inOutline: outline) })
+            let blocks = block.children.flatMap({ blockWithID(id: $0, inOutline: outline) })
             let filtered = filterBlocks(blocks: blocks, forMode: mode)
             return BlockGroup(block : block, children : filtered)
         }

@@ -12,10 +12,10 @@ import Foundation
 
 class DebugMenuLogger: NSObject, LoggerSink {
 
-    let filename: String
+    @objc let filename: String
     private var filehandle: FileHandle!
 
-    var alwaysPrint = true
+    @objc var alwaysPrint = true
 
     private class var filename: String {
         let cachesDir = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true)[0]
@@ -34,7 +34,7 @@ class DebugMenuLogger: NSObject, LoggerSink {
         }
     }
 
-    override init() {
+    @objc override init() {
         filename = DebugMenuLogger.filename
         super.init()
 
@@ -74,7 +74,7 @@ class DebugMenuLogger: NSObject, LoggerSink {
         _ = try? FileManager.default.removeItem(atPath: filename)
     }
 
-    func clear() {
+    @objc func clear() {
         deleteFile()
         createFile()
         writeToday()

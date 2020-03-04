@@ -102,7 +102,7 @@ class PostsViewController: UIViewController, UITableViewDataSource, UITableViewD
     private let contentView = UIView()
     
     private var context : Context?
-    let topicID: String?
+    private let topicID: String?
     
     private var posts: [DiscussionThread] = []
     private var selectedFilter: DiscussionPostsFilter = .AllPosts
@@ -163,7 +163,7 @@ class PostsViewController: UIViewController, UITableViewDataSource, UITableViewD
         tableView.delegate = self
         tableView.tableFooterView = UIView(frame: CGRect.zero)
         tableView.estimatedRowHeight = 150
-        tableView.rowHeight = UITableView.automaticDimension
+        tableView.rowHeight = UITableViewAutomaticDimension
         tableView.applyStandardSeparatorInsets()
         tableView.cellLayoutMarginsFollowReadableWidth = false
         
@@ -525,7 +525,7 @@ class PostsViewController: UIViewController, UITableViewDataSource, UITableViewD
         self.loadController.state = self.posts.isEmpty ? emptyState : .Loaded
         // set visibility of header view
         updateHeaderViewVisibility()
-        UIAccessibility.post(notification: UIAccessibility.Notification.layoutChanged, argument: nil)
+        UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nil)
     }
 
     func titleForFilter(filter : DiscussionPostsFilter) -> String {

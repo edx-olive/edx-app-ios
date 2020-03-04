@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import WebKit
 import edXCore
 
 private let notificationLabelLeadingOffset = 20.0
@@ -22,7 +21,7 @@ private func announcementsDeserializer(response: HTTPURLResponse, json: JSON) ->
     }
 }
 
-class CourseAnnouncementsViewController: OfflineSupportViewController, LoadStateViewReloadSupport, InterfaceOrientationOverriding {
+class CourseAnnouncementsViewController: OfflineSupportViewController, UIWebViewDelegate, LoadStateViewReloadSupport, InterfaceOrientationOverriding {
     
     typealias Environment = OEXAnalyticsProvider & OEXConfigProvider & DataManagerProvider & NetworkManagerProvider & OEXRouterProvider & OEXInterfaceProvider & ReachabilityProvider & OEXSessionProvider & OEXStylesProvider
     
@@ -31,7 +30,7 @@ class CourseAnnouncementsViewController: OfflineSupportViewController, LoadState
     private let loadController = LoadStateViewController()
     private let announcementsLoader = BackedStream<[OEXAnnouncement]>()
     
-    private let webView: WKWebView
+    private let webView: UIWebView
     fileprivate let notificationBar : UIView
     private let notificationLabel : UILabel
     private let notificationSwitch : UISwitch
@@ -42,7 +41,7 @@ class CourseAnnouncementsViewController: OfflineSupportViewController, LoadState
     @objc init(environment: Environment, courseID: String) {
         self.courseID = courseID
         self.environment = environment
-        self.webView = WKWebView()
+        self.webView = UIWebView()
         self.notificationBar = UIView(frame: CGRect.zero)
         self.notificationBar.clipsToBounds = true
         self.notificationLabel = UILabel(frame: CGRect.zero)
@@ -70,9 +69,9 @@ class CourseAnnouncementsViewController: OfflineSupportViewController, LoadState
         notificationSwitch.oex_addAction({[weak self] _ in
             if let owner = self {
                 owner.environment.dataManager.pushSettings.setPushDisabled(!owner.notificationSwitch.isOn, forCourseID: owner.courseID)
-            }}, for: UIControl.Event.valueChanged)
+            }}, for: UIControlEvents.valueChanged)
         
-        webView.navigationDelegate = self
+        self.webView.delegate = self
         
         announcementsLoader.listen(self) {[weak self] in
             switch $0 {
@@ -113,14 +112,15 @@ class CourseAnnouncementsViewController: OfflineSupportViewController, LoadState
         return .allButUpsideDown
     }
     
-    private func loadContent() {        
+    private func loadContent() {
         if !announcementsLoader.active {
-            loadController.state = .Initial
-            let courseStream = environment.dataManager.enrollmentManager.streamForCourseWithID(courseID: courseID)
-            let announcementStream = courseStream.transform {[weak self] enrollment in
-                return self?.environment.networkManager.streamForRequest(CourseAnnouncementsViewController.requestForCourse(course: enrollment.course), persistResponse: true) ?? OEXStream<Array>(error : NSError.oex_courseContentLoadError())
-            }
-            announcementsLoader.backWithStream((courseStream.value != nil) ? announcementStream : OEXStream<Array>(error : NSError.oex_courseContentLoadError()))
+            let networkManager = environment.networkManager
+            announcementsLoader.backWithStream(
+                environment.dataManager.enrollmentManager.streamForCourseWithID(courseID: courseID).transform {
+                    let request = CourseAnnouncementsViewController.requestForCourse(course: $0.course)
+                    return networkManager.streamForRequest(request, persistResponse: true)
+                }
+            )
         }
     }
     
@@ -195,31 +195,29 @@ class CourseAnnouncementsViewController: OfflineSupportViewController, LoadState
         self.webView.loadHTMLString(displayHTML, baseURL: baseURL)
     }
     
+    //MARK: - UIWebViewDeleagte
+    
+    func webView(_ webView: UIWebView, shouldStartLoadWith request: URLRequest, navigationType: UIWebViewNavigationType) -> Bool {
+        if (navigationType != UIWebViewNavigationType.other) {
+            if let URL = request.url {
+                UIApplication.shared.openURL(URL)
+                return false
+            }
+        }
+        return true
+    }
+    
+    func webViewDidFinishLoad(_ webView: UIWebView) {
+        self.loadController.state = .Loaded
+    }
+    
+    func webView(_ webView: UIWebView, didFailLoadWithError error: Error) {
+        self.loadController.state = LoadState.failed(error: error as NSError)
+    }
+    
     //MARK:- LoadStateViewReloadSupport method
     func loadStateViewReload() {
         loadContent()
-    }
-}
-
-extension CourseAnnouncementsViewController: WKNavigationDelegate {
-    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-        switch navigationAction.navigationType {
-        case .linkActivated, .formSubmitted, .formResubmitted:
-            if let URL = navigationAction.request.url, UIApplication.shared.canOpenURL(URL){
-                UIApplication.shared.openURL(URL)
-            }
-            decisionHandler(.cancel)
-        default:
-            decisionHandler(.allow)
-        }
-    }
-
-    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        loadController.state = .Loaded
-    }
-
-    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        loadController.state = LoadState.failed(error: error as NSError)
     }
 }
 

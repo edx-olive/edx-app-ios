@@ -44,7 +44,7 @@ class DiscussionCommentCell: UITableViewCell {
         endorsedLabel.isHidden = !endorsed
     }
     
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         self.selectionStyle = .none
         
@@ -61,7 +61,7 @@ class DiscussionCommentCell: UITableViewCell {
         divider.backgroundColor = OEXStyles.shared().discussionsBackgroundColor
         containerView.backgroundColor = OEXStyles.shared().neutralWhiteT()
         containerView.applyBorderStyle(style: BorderStyle())
-        accessibilityTraits = UIAccessibilityTraits.header
+        accessibilityTraits = UIAccessibilityTraitHeader
         bodyTextView.isAccessibilityElement = false
     }
     
@@ -80,7 +80,7 @@ class DiscussionCommentCell: UITableViewCell {
     private func setConstraints() {
         
         containerView.snp.makeConstraints { make in
-            make.edges.equalTo(contentView).inset(UIEdgeInsets.init(top: 0, left: StandardHorizontalMargin, bottom: 0, right: StandardHorizontalMargin))
+            make.edges.equalTo(contentView).inset(UIEdgeInsetsMake(0, StandardHorizontalMargin, 0, StandardHorizontalMargin))
         }
         
         authorProfileImage.snp.makeConstraints { make in
@@ -180,7 +180,7 @@ class DiscussionCommentCell: UITableViewCell {
                     viewController?.showOverlay(withMessage: DiscussionHelper.messageForError(error: result.error))
                 }
             }
-            }, for: UIControl.Event.touchUpInside)
+            }, for: UIControlEvents.touchUpInside)
         
         
         setEndorsed(endorsed: false)
@@ -276,7 +276,7 @@ class DiscussionCommentsViewController: UIViewController, UITableViewDataSource,
     private let addCommentButton = UIButton(type: .system)
     fileprivate var tableView: UITableView!
     fileprivate var comments : [DiscussionComment]  = []
-    private var responseItem: DiscussionComment?
+    private var responseItem: DiscussionComment
     weak var delegate: DiscussionCommentsViewControllerDelegate?
     var profileFeed: Feed<UserProfile>?
     var tempComment: DiscussionComment? // This will be used for injecting user info to added comment
@@ -300,48 +300,39 @@ class DiscussionCommentsViewController: UIViewController, UITableViewDataSource,
                 addCommentButton.oex_addAction({[weak self] (action : AnyObject!) -> Void in
                     if let owner = self {
                         
-                        guard let thread = owner.thread, let responseItem = owner.responseItem else { return }
+                        guard let thread = owner.thread else { return }
                         
-                        owner.environment.router?.showDiscussionNewCommentFromController(controller: owner, courseID: owner.courseID, thread: thread, context: .Comment(responseItem))
+                        owner.environment.router?.showDiscussionNewCommentFromController(controller: owner, courseID: owner.courseID, thread: thread, context: .Comment(owner.responseItem))
                     }
-                    }, for: UIControl.Event.touchUpInside)
+                    }, for: UIControlEvents.touchUpInside)
             }
         }
     }
-
+    
+    private var commentID: String {
+        return responseItem.commentID
+    }
+    
     var paginationController : PaginationController<DiscussionComment>?
     
     //Only used to set commentsClosed out of initialization context
     //TODO: Get rid of this variable when Swift improves
     private var closed : Bool = false
-    private var thread: DiscussionThread?
+    private let thread: DiscussionThread?
     private var isDiscussionBlackedOut: Bool
-    private var threadID: String?
-    var commentID: String?
     
-    init(environment: Environment, courseID : String, isDiscussionBlackedOut: Bool = false) {
+    init(environment: Environment, courseID : String, responseItem: DiscussionComment, closed : Bool, thread: DiscussionThread?,isDiscussionBlackedOut: Bool = false) {
         self.courseID = courseID
         self.environment = environment
+        self.responseItem = responseItem
+        self.thread = thread
         self.discussionManager = self.environment.dataManager.courseDataManager.discussionManagerForCourseWithID(courseID: self.courseID)
+        self.closed = closed
         self.isDiscussionBlackedOut = isDiscussionBlackedOut
         self.loadController = LoadStateViewController()
         super.init(nibName: nil, bundle: nil)
     }
 
-    convenience init(environment: Environment, courseID : String, responseItem: DiscussionComment, closed : Bool, thread: DiscussionThread?, isDiscussionBlackedOut: Bool = false) {
-        self.init(environment: environment, courseID: courseID, isDiscussionBlackedOut: isDiscussionBlackedOut)
-        self.responseItem = responseItem
-        self.thread = thread
-        self.closed = closed
-    }
-    
-    convenience init(environment: Environment, courseID : String, commentID: String, threadID: String) {
-        self.init(environment: environment, courseID: courseID)
-        self.commentID = commentID
-        self.threadID = threadID
-    }
-    
-    
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -354,7 +345,7 @@ class DiscussionCommentsViewController: UIViewController, UITableViewDataSource,
         tableView.dataSource = self
         tableView.delegate = self
         tableView.estimatedRowHeight = 100
-        tableView.rowHeight = UITableView.automaticDimension
+        tableView.rowHeight = UITableViewAutomaticDimension
         
         addSubviews()
         setStyles()
@@ -364,56 +355,9 @@ class DiscussionCommentsViewController: UIViewController, UITableViewDataSource,
         
         self.commentsClosed = self.closed
         
-        if responseItem != nil {
-            initializeViewContent()
-        }
-        else if thread == nil {
-            // In deep linking, we need to load thread and responseItem with their Ids.
-            loadThread()
-        }
-        else {
-            loadDiscussionResponse()
-        }
-    }
-    
-    private func initializeViewContent() {
         initializePaginator()
         loadContent()
         setupProfileLoader()
-    }
-    
-    private func loadThread() {
-        guard let threadID = threadID else { return }
-
-        let apiRequest = DiscussionAPI.readThread(read: true, threadID: threadID)
-        environment.networkManager.taskForRequest(apiRequest) {[weak self] result in
-            if result.response?.httpStatusCode.is2xx ?? false {
-                if let thread = result.data {
-                    self?.thread = thread
-                    self?.loadDiscussionResponse()
-                }
-            }
-            else {
-                self?.loadController.state = LoadState.failed(error: result.error)
-            }
-        }
-    }
-    
-    private func loadDiscussionResponse() {
-        guard let commentID = commentID else { return }
-        
-        let apiRequest =  DiscussionAPI.getResponse(responseID: commentID)
-        environment.networkManager.taskForRequest(apiRequest) {[weak self] result in
-            if result.response?.httpStatusCode.is2xx ?? false {
-                if let response = result.data {
-                    self?.responseItem = response
-                    self?.initializeViewContent()
-                }
-            }
-            else {
-                self?.loadController.state = LoadState.failed(error: result.error)
-            }
-        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -430,7 +374,7 @@ class DiscussionCommentsViewController: UIViewController, UITableViewDataSource,
     }
     
     private func logScreenEvent() {
-        environment.analytics.trackDiscussionScreen(withName: AnalyticsScreenName.ViewResponseComments, courseId: courseID, value: thread?.title, threadId: responseItem?.threadID, topicId: nil, responseID: responseItem?.commentID, author: responseItem?.author)
+        self.environment.analytics.trackDiscussionScreen(withName: AnalyticsScreenName.ViewResponseComments, courseId: self.courseID, value: thread?.title, threadId: responseItem.threadID, topicId: nil, responseID: responseItem.commentID, author: responseItem.author)
     }
     
     func addSubviews() {
@@ -441,10 +385,10 @@ class DiscussionCommentsViewController: UIViewController, UITableViewDataSource,
     
     func setStyles() {
         
-        tableView.separatorStyle = UITableViewCell.SeparatorStyle.none
+        tableView.separatorStyle = UITableViewCellSeparatorStyle.none
         tableView.applyStandardSeparatorInsets()
         tableView.backgroundColor = OEXStyles.shared().neutralXLight()
-        tableView.contentInset = UIEdgeInsets.init(top: 10.0, left: 0, bottom: 0, right: 0)
+        tableView.contentInset = UIEdgeInsetsMake(10.0, 0, 0, 0)
         tableView.clipsToBounds = true
         
         self.navigationItem.title = Strings.comments
@@ -489,15 +433,13 @@ class DiscussionCommentsViewController: UIViewController, UITableViewDataSource,
     }
     
     private func initializePaginator() {
-    
-        guard let responseItem = responseItem else { return }
         
-        precondition(!responseItem.commentID.isEmpty, "Shouldn't be showing comments for empty commentID")
+        let commentID = self.commentID
+        precondition(!commentID.isEmpty, "Shouldn't be showing comments for empty commentID")
         
-        let paginator = WrappedPaginator(networkManager: self.environment.networkManager) {[weak self] page in
-            return DiscussionAPI.getComments(environment: self?.environment.router?.environment, commentID: responseItem.commentID, pageNumber: page)
+        let paginator = WrappedPaginator(networkManager: self.environment.networkManager) { page in
+            return DiscussionAPI.getComments(environment: self.environment.router?.environment, commentID: commentID, pageNumber: page)
         }
-        
         paginationController = PaginationController(paginator: paginator, tableView: self.tableView)
     }
     
@@ -507,7 +449,7 @@ class DiscussionCommentsViewController: UIViewController, UITableViewDataSource,
                 self?.loadController.state = .Loaded
                 self?.comments = comments
                 self?.tableView.reloadData()
-                UIAccessibility.post(notification: UIAccessibility.Notification.layoutChanged, argument: nil)
+                UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nil)
             }, failure: { [weak self] (error) -> Void in
                 self?.loadController.state = LoadState.failed(error: error)
         })
@@ -559,9 +501,11 @@ class DiscussionCommentsViewController: UIViewController, UITableViewDataSource,
         
         switch TableSection(rawValue: indexPath.section) {
         case .some(.Response):
-            guard let responseItem = responseItem, let thread = thread else { return UITableViewCell() }
-                cell.useResponse(response: responseItem, viewController: self)
+            cell.useResponse(response: responseItem, viewController: self)
+            if let thread = thread {
                 DiscussionHelper.updateEndorsedTitle(thread: thread, label: cell.endorsedLabel, textStyle: cell.endorsedTextStyle)
+            }
+            
             return cell
         case .some(.Comments):
             cell.useComment(comment: comments[indexPath.row], inViewController: self, index: indexPath.row)
@@ -575,15 +519,14 @@ class DiscussionCommentsViewController: UIViewController, UITableViewDataSource,
     // MARK- DiscussionNewCommentViewControllerDelegate method 
     
     func newCommentController(controller: DiscussionNewCommentViewController, addedComment comment: DiscussionComment) {
-        responseItem?.childCount += 1
+        responseItem.childCount += 1
         
         if !(paginationController?.hasNext ?? false) {
             tempComment = comment
             profileFeed?.refresh()
         }
-        if let responseItem = responseItem {
-            delegate?.discussionCommentsView(controller: self, updatedComment: responseItem)
-        }
+        
+        delegate?.discussionCommentsView(controller: self, updatedComment: responseItem)
         showOverlay(withMessage: Strings.discussionCommentPosted)
     }
 }

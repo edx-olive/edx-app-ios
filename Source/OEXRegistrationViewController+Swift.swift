@@ -61,27 +61,23 @@ extension OEXRegistrationViewController {
                             controllers.setSafeObject(controller, forKey: controller?.field.name ?? "")
                             controller?.handleError("")
                         }
-                        
-                        do {
-                            let dictionary = try JSONSerialization.jsonObject(with: data, options: []) as AnyObject
-                            if dictionary is Dictionary<AnyHashable, Any> {
-                                dictionary.enumerateKeysAndObjects({ (key, value, stop) in
-                                    let key = key as? String ?? ""
-                                    weak var controller: OEXRegistrationFieldController? = controllers[key] as? OEXRegistrationFieldController
-                                    if let array = value as? NSArray {
-                                        let errorStrings = array.oex_map({ (info) -> Any in
-                                            if let info = info as? [AnyHashable: Any] {
-                                                return OEXRegistrationFieldError(dictionary: info).userMessage
-                                            }
-                                            return  OEXRegistrationFieldError().userMessage
-                                        })
-                                        let errors = (errorStrings as NSArray).componentsJoined(by: " ")
-                                        controller?.handleError(errors)
-                                    }
-                                })
-                            }
-                        } catch let error as NSError {
-                            Logger.logError("Registration", "Failed to load: \(error.localizedDescription)")
+                        let dictionary = JSONSerialization.oex_JSONObject(with: data, error: nil) as AnyObject
+                        if dictionary is Dictionary<AnyHashable, Any> {
+                            dictionary.enumerateKeysAndObjects({ (key, value, stop) in
+                                let key = key as? String ?? ""
+                                weak var controller: OEXRegistrationFieldController? = controllers[key] as? OEXRegistrationFieldController
+                                if let array = value as? NSArray {
+                                    let errorStrings = array.oex_map({ (info) -> Any in
+                                        if let info = info as? [AnyHashable: Any] {
+                                            return OEXRegistrationFieldError(dictionary: info).userMessage
+                                        }
+                                        return  OEXRegistrationFieldError().userMessage
+                                        
+                                    })
+                                    let errors = (errorStrings as NSArray).componentsJoined(by: " ")
+                                    controller?.handleError(errors)
+                                }
+                            })
                         }
                         owner.showProgress(false)
                         owner.refreshFormFields()

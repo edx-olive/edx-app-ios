@@ -1,1 +1,1 @@
-../../../Analytics/Analytics/Classes/SEGAnalytics.h
+../../../Analytics/Pod/Classes/SEGAnalytics.h

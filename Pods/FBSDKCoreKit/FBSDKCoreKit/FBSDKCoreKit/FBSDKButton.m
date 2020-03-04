@@ -76,7 +76,7 @@
 
 - (CGRect)imageRectForContentRect:(CGRect)contentRect
 {
-  if (self.hidden || CGRectIsEmpty(self.bounds)) {
+  if ([self isHidden] || CGRectIsEmpty(self.bounds)) {
     return CGRectZero;
   }
   CGRect imageRect = UIEdgeInsetsInsetRect(contentRect, self.imageEdgeInsets);
@@ -101,9 +101,9 @@
 {
   // automatic impression tracking if the button conforms to FBSDKButtonImpressionTracking
   if ([self conformsToProtocol:@protocol(FBSDKButtonImpressionTracking)]) {
-    NSString *eventName = ((id<FBSDKButtonImpressionTracking>)self).impressionTrackingEventName;
-    NSString *identifier = ((id<FBSDKButtonImpressionTracking>)self).impressionTrackingIdentifier;
-    NSDictionary<NSString *, id> *parameters = ((id<FBSDKButtonImpressionTracking>)self).analyticsParameters;
+    NSString *eventName = [(id<FBSDKButtonImpressionTracking>)self impressionTrackingEventName];
+    NSString *identifier = [(id<FBSDKButtonImpressionTracking>)self impressionTrackingIdentifier];
+    NSDictionary *parameters = [(id<FBSDKButtonImpressionTracking>)self analyticsParameters];
     if (eventName && identifier) {
       FBSDKViewImpressionTracker *impressionTracker = [FBSDKViewImpressionTracker impressionTrackerWithEventName:eventName];
       [impressionTracker logImpressionWithIdentifier:identifier parameters:parameters];
@@ -114,7 +114,7 @@
 
 - (CGSize)sizeThatFits:(CGSize)size
 {
-  if (self.hidden) {
+  if ([self isHidden]) {
     return CGSizeZero;
   }
   CGSize normalSize = [self sizeThatFits:size title:[self titleForState:UIControlStateNormal]];
@@ -131,7 +131,7 @@
 
 - (CGRect)titleRectForContentRect:(CGRect)contentRect
 {
-  if (self.hidden || CGRectIsEmpty(self.bounds)) {
+  if ([self isHidden] || CGRectIsEmpty(self.bounds)) {
     return CGRectZero;
   }
   CGRect imageRect = [self imageRectForContentRect:contentRect];
@@ -166,17 +166,17 @@
 
 - (void)logTapEventWithEventName:(NSString *)eventName parameters:(NSDictionary *)parameters
 {
-  [FBSDKAppEvents logInternalEvent:eventName
-                        parameters:parameters
-                isImplicitlyLogged:YES
-                       accessToken:[FBSDKAccessToken currentAccessToken]];
+    [FBSDKAppEvents logImplicitEvent:eventName
+                          valueToSum:nil
+                          parameters:parameters
+                         accessToken:[FBSDKAccessToken currentAccessToken]];
 }
 
 - (void)checkImplicitlyDisabled
 {
-  BOOL enabled = !_isExplicitlyDisabled && !self.implicitlyDisabled;
-  BOOL currentEnabled = self.enabled;
-  super.enabled = enabled;
+  BOOL enabled = !_isExplicitlyDisabled && ![self isImplicitlyDisabled];
+  BOOL currentEnabled = [self isEnabled];
+  [super setEnabled:enabled];
   if (currentEnabled != enabled) {
     [self invalidateIntrinsicContentSize];
     [self setNeedsLayout];
@@ -185,10 +185,10 @@
 
 - (void)configureButton
 {
-  [self configureWithIcon:[self defaultIcon]
+  [self configureWithIcon:[[self class] defaultIcon]
                     title:nil
-          backgroundColor:[self defaultBackgroundColor]
-         highlightedColor:[self defaultHighlightedColor]];
+          backgroundColor:[[self class] defaultBackgroundColor]
+         highlightedColor:[[self class] defaultHighlightedColor]];
 }
 
 - (void)configureWithIcon:(FBSDKIcon *)icon
@@ -215,6 +215,12 @@
             selectedColor:(UIColor *)selectedColor
  selectedHighlightedColor:(UIColor *)selectedHighlightedColor
 {
+  if (!selectedColor) {
+    selectedColor = [self defaultSelectedColor];
+  }
+  if (!selectedHighlightedColor) {
+    selectedHighlightedColor = highlightedColor;
+  }
   [self _configureWithIcon:icon
                      title:title
            backgroundColor:backgroundColor
@@ -227,7 +233,7 @@
 
 - (UIColor *)defaultBackgroundColor
 {
-  return [UIColor colorWithRed:24.0/255.0 green:119.0/255.0 blue:242.0/255.0 alpha:1.0];
+  return [UIColor colorWithRed:65.0/255.0 green:93.0/255.0 blue:174.0/255.0 alpha:1.0];
 }
 
 - (UIColor *)defaultDisabledColor
@@ -242,7 +248,7 @@
 
 - (UIColor *)defaultHighlightedColor
 {
-  return [UIColor colorWithRed:21.0/255.0 green:105.0/255.0 blue:214.0/255.0 alpha:1.0];
+  return [UIColor colorWithRed:47.0/255.0 green:71.0/255.0 blue:122.0/255.0 alpha:1.0];
 }
 
 - (FBSDKIcon *)defaultIcon
@@ -253,11 +259,6 @@
 - (UIColor *)defaultSelectedColor
 {
   return [UIColor colorWithRed:124.0/255.0 green:143.0/255.0 blue:200.0/255.0 alpha:1.0];
-}
-
-- (UIColor *)highlightedContentColor
-{
-  return [UIColor colorWithRed:218.0/255.0 green:221.0/255.0 blue:226.0/255.0 alpha:1.0];
 }
 
 - (BOOL)isImplicitlyDisabled
@@ -332,20 +333,11 @@
   if (!icon) {
     icon = [self defaultIcon];
   }
-  if (!selectedIcon) {
-    selectedIcon = [self defaultIcon];
-  }
   if (!backgroundColor) {
     backgroundColor = [self defaultBackgroundColor];
   }
   if (!highlightedColor) {
     highlightedColor = [self defaultHighlightedColor];
-  }
-  if (!selectedColor) {
-    selectedColor = [self defaultSelectedColor];
-  }
-  if (!selectedHighlightedColor) {
-    selectedHighlightedColor = highlightedColor;
   }
 
   self.adjustsImageWhenDisabled = NO;
@@ -385,7 +377,6 @@
   }
 
   [self setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-  [self setTitleColor:[self highlightedContentColor] forState: UIControlStateHighlighted | UIControlStateSelected];
 
   [self setTitle:title forState:UIControlStateNormal];
 #if TARGET_OS_TV

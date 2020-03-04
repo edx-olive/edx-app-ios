@@ -9,7 +9,7 @@
 import Foundation
 
 extension UIViewController {
-    func isVerticallyCompact() -> Bool {
+    @objc func isVerticallyCompact() -> Bool {
         // In case of iPad vertical size class is always regular for both height and width
         if UIDevice.current.userInterfaceIdiom == .pad && UIDevice.current.orientation.isLandscape {
             return true
@@ -17,12 +17,12 @@ extension UIViewController {
         return self.traitCollection.verticalSizeClass == .compact
     }
     
-    func currentOrientation() -> UIInterfaceOrientation {
+    @objc func currentOrientation() -> UIInterfaceOrientation {
         return UIApplication.shared.statusBarOrientation
     }
     
-    func isModal() -> Bool {
-        return (navigationController?.viewControllers.firstIndex(of: self) == 0) &&
+    @objc func isModal() -> Bool {
+        return (navigationController?.viewControllers.index(of: self) == 0) &&
             (presentingViewController?.presentedViewController == self
             || isRootModal()
             || tabBarController?.presentingViewController is UITabBarController)
@@ -34,18 +34,10 @@ extension UIViewController {
         return (navigationController != nil && navigationController?.presentingViewController?.presentedViewController == navigationController)
     }
     
-    func configurePresentationController(withSourceView sourceView: UIView) {
+    @objc func configurePresentationController(withSourceView sourceView: UIView) {
         if UIDevice.current.userInterfaceIdiom == UIUserInterfaceIdiom.pad {
             popoverPresentationController?.sourceView = sourceView
             popoverPresentationController?.sourceRect = sourceView.bounds
         }
-    }
-    
-    @objc func addBackBarButton() {
-        let backItem = UIBarButtonItem(image: Icon.ArrowLeft.imageWithFontSize(size: 40), style: .plain, target: nil, action: nil)
-        backItem.oex_setAction { [weak self] in
-            self?.navigationController?.popViewController(animated: true)
-        }
-        navigationItem.leftBarButtonItem = backItem
     }
 }

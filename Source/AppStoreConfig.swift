@@ -33,7 +33,7 @@ extension OEXConfig {
         return AppStoreConfig(uris: self[appUpdateURIKey] as? NSArray ?? [])
     }
     
-    var appReviewURI : String? {
+    @objc var appReviewURI : String? {
         return string(forKey: appReviewURIKey)
     }
 }

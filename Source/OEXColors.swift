@@ -53,7 +53,7 @@ public class OEXColors: NSObject {
         return color(forIdentifier: identifier, alpha: 1.0)
     }
     
-    public func color(forIdentifier identifier: ColorsIdentifiers, alpha: CGFloat) -> UIColor {
+    @objc public func color(forIdentifier identifier: ColorsIdentifiers, alpha: CGFloat) -> UIColor {
         if let hexValue = colorsDictionary[getIdentifier(identifier: identifier)] as? String {
             let color = UIColor(hexString: hexValue, alpha: alpha)
             return color

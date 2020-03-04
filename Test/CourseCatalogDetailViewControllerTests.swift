@@ -35,10 +35,6 @@ class CourseCatalogDetailViewControllerTests: SnapshotTestCase {
             startInfo: startInfo,
             end: endDate as NSDate)
         let (_, controller) = setupWithCourse(course)
-        controller.view.setNeedsUpdateConstraints()
-        controller.view.updateConstraintsIfNeeded()
-        controller.view.setNeedsLayout()
-        controller.view.layoutIfNeeded()
         inScreenNavigationContext(controller) {
             self.waitForStream(controller.t_loaded)
             stepRunLoop()
@@ -169,7 +165,7 @@ class CourseCatalogDetailViewControllerTests: SnapshotTestCase {
                 return (nil, UserCourseEnrollment(course:course, isActive: true))
             }
             
-            expectation(forNotification: NSNotification.Name(rawValue:EnrollmentShared.successNotification), object: nil, handler: { (notification) -> Bool in
+            expectation(forNotification: EnrollmentShared.successNotification, object: nil, handler: { (notification) -> Bool in
                 let enrollmentMessage = notification.object as! String
                 return enrollmentMessage == message
             })

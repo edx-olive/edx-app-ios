@@ -13,35 +13,35 @@ extension OEXConfig {
         return bool(forKey: "PUSH_NOTIFICATIONS")
     }
 
-    var discussionsEnabled : Bool {
+    @objc var discussionsEnabled : Bool {
         return bool(forKey: "DISCUSSIONS_ENABLED")
     }
     
-    var courseDatesEnabled : Bool {
+    @objc var courseDatesEnabled : Bool {
         return bool(forKey: "COURSE_DATES_ENABLED")
     }
 
-    var certificatesEnabled : Bool {
+    @objc var certificatesEnabled : Bool {
         return bool(forKey: "CERTIFICATES_ENABLED")
     }
 
-    var profilesEnabled : Bool {
+    @objc var profilesEnabled : Bool {
         return bool(forKey: "USER_PROFILES_ENABLED")
     }
 
-    var courseSharingEnabled : Bool {
+    @objc var courseSharingEnabled : Bool {
         return bool(forKey: "COURSE_SHARING_ENABLED")
     }
 
-    var badgesEnabled : Bool {
+    @objc var badgesEnabled : Bool {
         return bool(forKey: "BADGES_ENABLED")
     }
     
-    var newLogistrationFlowEnabled: Bool {
+    @objc var newLogistrationFlowEnabled: Bool {
         return bool(forKey: "NEW_LOGISTRATION_ENABLED")
     }
     
-    var discussionsEnabledProfilePictureParam: Bool {
+    @objc var discussionsEnabledProfilePictureParam: Bool {
         return bool(forKey: "DISCUSSIONS_ENABLE_PROFILE_PICTURE_PARAM")
     }
     
@@ -50,19 +50,19 @@ extension OEXConfig {
         return bool(forKey: "REGISTRATION_ENABLED", defaultValue: true)
     }
         
-    var isVideoTranscriptEnabled : Bool {
+    @objc var isVideoTranscriptEnabled : Bool {
         return bool(forKey: "VIDEO_TRANSCRIPT_ENABLED")
     }
     
-    var isAppReviewsEnabled : Bool {
+    @objc var isAppReviewsEnabled : Bool {
         return bool(forKey: "APP_REVIEWS_ENABLED")
     }
     
-    var isWhatsNewEnabled: Bool {
+    @objc var isWhatsNewEnabled: Bool {
         return bool(forKey: "WHATS_NEW_ENABLED")
     }
     
-    var isCourseVideosEnabled: Bool {
+    @objc var isCourseVideosEnabled: Bool {
         // By default course videos are enabled
         return bool(forKey: "COURSE_VIDEOS_ENABLED", defaultValue: true)
     }
@@ -72,7 +72,7 @@ extension OEXConfig {
         return bool(forKey: "USING_VIDEO_PIPELINE", defaultValue: true)
     }
   
-    var isAnnouncementsEnabled: Bool {
+    @objc var isAnnouncementsEnabled: Bool {
         return bool(forKey: "ANNOUNCEMENTS_ENABLED")
     }
 }

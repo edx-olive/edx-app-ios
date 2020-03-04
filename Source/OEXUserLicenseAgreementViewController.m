@@ -10,14 +10,12 @@
 
 #import "edX-Swift.h"
 #import "Logger+OEXObjC.h"
-#import <WebKit/WebKit.h>
-#import "OEXRegistrationAgreement.h"
-#import <Masonry/Masonry.h>
 
-@interface OEXUserLicenseAgreementViewController () <WKNavigationDelegate>
+#import "OEXRegistrationAgreement.h"
+
+@interface OEXUserLicenseAgreementViewController () <UIWebViewDelegate>
 {
-    __weak IBOutlet UIView *webviewContainer;
-    WKWebView* webView;
+    IBOutlet UIWebView* webView;
     IBOutlet UIActivityIndicatorView* activityIndicator;
 }
 @property(nonatomic, strong) NSURL* contentUrl;
@@ -42,71 +40,42 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
     [_closeButton setTitle:[Strings close] forState:UIControlStateNormal];
-    [self addAndConfigureWebview];
-    [self loadURL];
-    [self addObserver];
-}
-
-- (void) addAndConfigureWebview {
-    webView = [[WKWebView alloc] init];
-    webView.navigationDelegate = self;
-    [self.view addSubview:webView];
-    [self.view bringSubviewToFront:webView];
-
-    [webView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.edges.equalTo(webviewContainer);
-    }];
-}
-
-- (void)addObserver {
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(reload)
-                                                 name:NOTIFICATION_DYNAMIC_TEXT_TYPE_UPDATE object:nil];
-}
-
-- (void)loadURL {
     NSURLRequest* request = [[NSURLRequest alloc] initWithURL:self.contentUrl];
+    webView.delegate = self;
     [webView loadRequest:request];
-}
-
-- (void)reload {
-    if (!webView.isLoading) {
-        [webView reload];
-    }
 }
 
 - (IBAction)closeButtonTapped:(id)sender {
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
-#pragma mark - WKNavigationDelegate methods
-
-- (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
-    NSURL *URL = navigationAction.request.URL;
-    if ([URL isFileURL]) {
-        decisionHandler(WKNavigationActionPolicyAllow);
-        return;
+- (BOOL)webView:(UIWebView*)inWeb shouldStartLoadWithRequest:(NSURLRequest*)inRequest navigationType:(UIWebViewNavigationType)inType {
+    if([[inRequest URL] isFileURL]) {
+        return YES;
     }
 
-    if (navigationAction.navigationType == UIWebViewNavigationTypeLinkClicked) {
-        if ([[UIApplication sharedApplication] canOpenURL:URL]) {
-            [[UIApplication sharedApplication] openURL:URL];
-        }
+    if(inType == UIWebViewNavigationTypeLinkClicked) {
+        [[UIApplication sharedApplication] openURL:[inRequest URL]];
+        return NO;
     }
-
-    decisionHandler(WKNavigationActionPolicyCancel);
-
+    return YES;
 }
 
-- (void)webView:(WKWebView *)webView didFailNavigation:(WKNavigation *)navigation withError:(NSError *)error {
+- (void)webView:(UIWebView*)webView didFailLoadWithError:(NSError*)error {
     [activityIndicator stopAnimating];
     OEXLogInfo(@"EULA", @"Error is %@", error.localizedDescription);
-    [[UIAlertController alloc] showAlertWithTitle:nil message:error.localizedDescription onViewController:self];
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:nil message:error.localizedDescription preferredStyle:UIAlertControllerStyleAlert];
+    [alert addAction:[UIAlertAction actionWithTitle:[Strings ok] style:UIAlertActionStyleDefault handler:nil]];
+    [self presentViewController:alert animated:YES completion:nil];
 }
 
-- (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation {
+- (void)webViewDidFinishLoad:(UIWebView*)webView {
     [activityIndicator stopAnimating];
     OEXLogInfo(@"EULA", @"Web View did finish loading");
 }
 
+- (void)webViewDidStartLoad:(UIWebView*)webView {
+    [activityIndicator startAnimating];
+    OEXLogInfo(@"EULA", @"Web View did start loading");
+}
 @end

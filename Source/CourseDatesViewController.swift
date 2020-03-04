@@ -30,8 +30,8 @@ class CourseDatesViewController: UIViewController, AuthenticatedWebViewControlle
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        addChild(webController)
-        webController.didMove(toParent: self)
+        addChildViewController(webController)
+        webController.didMove(toParentViewController: self)
         view.addSubview(webController.view)
         navigationItem.title = Strings.Coursedates.courseImportantDatesTitle
         setConstraints()

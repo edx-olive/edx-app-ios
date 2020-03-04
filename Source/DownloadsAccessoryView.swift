@@ -30,7 +30,7 @@ class DownloadsAccessoryView : UIView {
         super.init(frame: frame)
         
         downloadButton.tintColor = OEXStyles.shared().neutralBase()
-        downloadButton.contentEdgeInsets = UIEdgeInsets.init(top: 15, left: 10, bottom: 15, right: 10)
+        downloadButton.contentEdgeInsets = UIEdgeInsetsMake(15, 10, 15, 10)
         downloadButton.setContentCompressionResistancePriority(UILayoutPriority.required, for: .horizontal)
         countLabel.setContentCompressionResistancePriority(UILayoutPriority.required, for: .horizontal)
         downloadSpinner.setContentCompressionResistancePriority(UILayoutPriority.required, for: .horizontal)
@@ -41,9 +41,9 @@ class DownloadsAccessoryView : UIView {
         
         // This view is atomic from an accessibility point of view
         self.isAccessibilityElement = true
-        downloadSpinner.accessibilityTraits = UIAccessibilityTraits.notEnabled;
-        countLabel.accessibilityTraits = UIAccessibilityTraits.notEnabled;
-        downloadButton.accessibilityTraits = UIAccessibilityTraits.notEnabled;
+        downloadSpinner.accessibilityTraits = UIAccessibilityTraitNotEnabled;
+        countLabel.accessibilityTraits = UIAccessibilityTraitNotEnabled;
+        downloadButton.accessibilityTraits = UIAccessibilityTraitNotEnabled;
         
         downloadSpinner.stopAnimating()
         
@@ -107,7 +107,7 @@ class DownloadsAccessoryView : UIView {
                 else {
                     accessibilityLabel = Strings.download
                 }
-                accessibilityTraits = UIAccessibilityTraits.button
+                accessibilityTraits = UIAccessibilityTraitButton
             case .Downloading:
                 downloadSpinner.startAnimating()
                 downloadSpinner.isHidden = false
@@ -117,7 +117,7 @@ class DownloadsAccessoryView : UIView {
                 countLabel.isHidden = true
                 
                 accessibilityLabel = Strings.downloading
-                accessibilityTraits = UIAccessibilityTraits.button
+                accessibilityTraits = UIAccessibilityTraitButton
             case .Deleting:
                 downloadSpinner.startAnimating()
                 downloadSpinner.isHidden = false
@@ -127,7 +127,7 @@ class DownloadsAccessoryView : UIView {
                 countLabel.isHidden = true
                 
                 accessibilityLabel = Strings.downloading
-                accessibilityTraits = UIAccessibilityTraits.button
+                accessibilityTraits = UIAccessibilityTraitButton
             case .Done:
                 useIcon(icon: .ContentDidDownload)
                 downloadSpinner.isHidden = true
@@ -142,7 +142,7 @@ class DownloadsAccessoryView : UIView {
                 else {
                     accessibilityLabel = Strings.downloaded
                 }
-                accessibilityTraits = UIAccessibilityTraits.staticText
+                accessibilityTraits = UIAccessibilityTraitStaticText
             }
         }
     }

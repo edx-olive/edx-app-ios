@@ -108,8 +108,8 @@ class LoadStateViewController : UIViewController {
     }
     
     @objc func setupInController(controller : UIViewController, contentView : UIView) {
-        controller.addChild(self)
-        didMove(toParent: controller)
+        controller.addChildViewController(self)
+        didMove(toParentViewController: controller)
         
         self.contentView = contentView
         contentView.alpha = 0

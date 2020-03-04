@@ -11,22 +11,12 @@ import Foundation
 class OEXTextStyleWithShadow: OEXTextStyle {
     var shadow: ShadowStyle?
 
-    override var attributes: [String : Any] {
+    override var attributes: [NSAttributedString.Key : Any] {
         var attr = super.attributes
         if let shadowStyle = shadow {
-            attr[NSAttributedString.Key.shadow.rawValue] = shadowStyle.shadow
+            attr[NSAttributedStringKey.shadow] = shadowStyle.shadow
         }
-        return attr
+        return attr as [NSAttributedString.Key : AnyObject]
     }
-}
-
-extension Dictionary {
-    func attributedKeyDictionary()-> [NSAttributedString.Key: Any] {
-        var convertedDict: [NSAttributedString.Key: Any] = [:]
-        for (key, value) in self {
-            convertedDict[NSAttributedString.Key(rawValue: key as? String ?? "")] = value
-        }
-
-        return convertedDict
-    }
+    
 }

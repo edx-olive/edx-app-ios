@@ -239,43 +239,23 @@ static OEXStyles* sSharedStyles;
 #pragma mark Fonts
 
 - (UIFont*)sansSerifOfSize:(CGFloat)size {
-    return [self.oexFonts fontFor:FontIdentifiersRegular
+    return [self.oexFonts fontForIdentifier:FontIdentifiersRegular
                                        size:size];
 }
 
 - (UIFont*)semiBoldSansSerifOfSize:(CGFloat)size {
-    return [self.oexFonts fontFor:FontIdentifiersSemiBold
+    return [self.oexFonts fontForIdentifier:FontIdentifiersSemiBold
                                        size:size];
 }
 
 - (UIFont*)boldSansSerifOfSize:(CGFloat)size {
-    return [self.oexFonts fontFor:FontIdentifiersBold
+    return [self.oexFonts fontForIdentifier:FontIdentifiersBold
                                        size:size];
 }
 
 - (UIFont*)lightSansSerifOfSize:(CGFloat)size {
-    return [self.oexFonts fontFor:FontIdentifiersLight
+    return [self.oexFonts fontForIdentifier:FontIdentifiersLight
                                        size:size];
-}
-
-- (UIFont*)sansSerifOfSize:(CGFloat)size dynamicTypeSupported:(BOOL) dynamicTypeSupported {
-    return [self.oexFonts fontFor:FontIdentifiersRegular
-                             size:size dynamicTypeSupported:dynamicTypeSupported];
-}
-
-- (UIFont*)semiBoldSansSerifOfSize:(CGFloat)size dynamicTypeSupported:(BOOL) dynamicTypeSupported {
-    return [self.oexFonts fontFor:FontIdentifiersSemiBold
-                             size:size dynamicTypeSupported:dynamicTypeSupported];
-}
-
-- (UIFont*)boldSansSerifOfSize:(CGFloat)size dynamicTypeSupported:(BOOL) dynamicTypeSupported {
-    return [self.oexFonts fontFor:FontIdentifiersBold
-                             size:size dynamicTypeSupported:dynamicTypeSupported];
-}
-
-- (UIFont*)lightSansSerifOfSize:(CGFloat)size dynamicTypeSupported:(BOOL) dynamicTypeSupported {
-    return [self.oexFonts fontFor:FontIdentifiersLight
-                             size:size dynamicTypeSupported:dynamicTypeSupported];
 }
 
 - (NSString*)styleHTMLContent:(NSString*)htmlString stylesheet:(NSString*)stylesheet {
@@ -295,7 +275,14 @@ static OEXStyles* sSharedStyles;
     [styledHTML insertString:@"</head>" atIndex:0];
     [styledHTML insertString:@"<meta name = \"viewport\" content = \"width=device-width, initial-scale=1\"/>" atIndex:0];
     [styledHTML insertString:@"<head>" atIndex:0];
-    [styledHTML insertString:@"<html>" atIndex:0];
+    
+    if (UIApplication.sharedApplication.userInterfaceLayoutDirection == UIUserInterfaceLayoutDirectionLeftToRight) {
+        [styledHTML insertString:@"<html>" atIndex:0];
+    }
+    else {
+        [styledHTML insertString:@"<html dir='rtl'>" atIndex:0];
+    }
+    
     return styledHTML;
 }
 

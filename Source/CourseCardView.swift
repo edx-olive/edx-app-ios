@@ -41,7 +41,7 @@ class CourseCardView: UIView, UIGestureRecognizerDelegate {
     private func setupView() {
         configureViews()
         
-        accessibilityTraits = UIAccessibilityTraits.staticText
+        accessibilityTraits = UIAccessibilityTraitStaticText
         accessibilityHint = Strings.accessibilityShowsCourseContent
     }
     
@@ -71,7 +71,7 @@ class CourseCardView: UIView, UIGestureRecognizerDelegate {
         
         container.backgroundColor = OEXStyles.shared().neutralWhite().withAlphaComponent(0.85)
         coverImageView.backgroundColor = OEXStyles.shared().neutralWhiteT()
-        coverImageView.contentMode = UIView.ContentMode.scaleAspectFill
+        coverImageView.contentMode = UIViewContentMode.scaleAspectFill
         coverImageView.clipsToBounds = true
         coverImageView.hidesLoadingSpinner = true
         
@@ -86,9 +86,8 @@ class CourseCardView: UIView, UIGestureRecognizerDelegate {
         
         coverImageView.setContentCompressionResistancePriority(UILayoutPriority.defaultLow, for: .horizontal)
         coverImageView.setContentCompressionResistancePriority(UILayoutPriority.defaultLow, for: .vertical)
-        dateLabel.setContentHuggingPriority(UILayoutPriority.defaultLow, for: NSLayoutConstraint.Axis.horizontal)
-        dateLabel.setContentCompressionResistancePriority(UILayoutPriority.defaultHigh, for: NSLayoutConstraint.Axis.horizontal)
-        dateLabel.adjustsFontSizeToFitWidth = true
+        dateLabel.setContentHuggingPriority(UILayoutPriority.defaultLow, for: UILayoutConstraintAxis.horizontal)
+        dateLabel.setContentCompressionResistancePriority(UILayoutPriority.defaultHigh, for: UILayoutConstraintAxis.horizontal)
         
         container.snp.makeConstraints { make in
             make.leading.equalTo(self)

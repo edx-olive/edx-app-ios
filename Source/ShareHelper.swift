@@ -20,14 +20,14 @@ func shareHashtaggedTextAndALink(textBuilder: @escaping (_ hashtagOrPlatform: St
 
 private func controllerWithItems(items: [AnyObject], analyticsCallback:((String) -> Void)?) -> UIActivityViewController{
     let controller = UIActivityViewController(activityItems: items, applicationActivities: nil)
-    controller.excludedActivityTypes = [UIActivity.ActivityType.assignToContact, UIActivity.ActivityType.print, UIActivity.ActivityType.saveToCameraRoll]
+    controller.excludedActivityTypes = [UIActivityType.assignToContact, UIActivityType.print, UIActivityType.saveToCameraRoll]
     controller.completionWithItemsHandler = {activityType, completed, _, error in
         if let type = activityType, completed {
             let analyticsType: String
             switch type {
-            case UIActivity.ActivityType.postToTwitter:
+            case UIActivityType.postToTwitter:
                 analyticsType = "twitter"
-            case UIActivity.ActivityType.postToFacebook:
+            case UIActivityType.postToFacebook:
                 analyticsType = "facebook"
             default:
                 analyticsType = "other"
@@ -40,7 +40,6 @@ private func controllerWithItems(items: [AnyObject], analyticsCallback:((String)
 }
 
 private class PlatformHashTag: NSObject, UIActivityItemSource {
-
     var config: OEXConfig { return OEXConfig.shared() }
     var platformName : String { return config.platformName() }
 
@@ -56,9 +55,9 @@ private class PlatformHashTag: NSObject, UIActivityItemSource {
     }
 
     //If this is going to Twitter and the hashtag has been defined in the configuration, use it otherwise use the platform name
-    fileprivate func activityViewController(_ activityViewController: UIActivityViewController, itemForActivityType activityType: UIActivity.ActivityType?) -> Any? {
+    fileprivate func activityViewController(_ activityViewController: UIActivityViewController, itemForActivityType activityType: UIActivityType?) -> Any? {
         var item = platformName
-        if let hashTag = config.twitterConfiguration?.hashTag, activityType == UIActivity.ActivityType.postToTwitter {
+        if let hashTag = config.twitterConfiguration?.hashTag, activityType == UIActivityType.postToTwitter {
             item = hashTag
         }
 
@@ -68,6 +67,7 @@ private class PlatformHashTag: NSObject, UIActivityItemSource {
 
 // This class creates new course share url by adding utm parameters with it depending on activity type 
 private class CourseShareURL: NSObject, UIActivityItemSource {
+    
     let courseShareURL: NSURL
     let courseShareUtmParams: CourseShareUtmParameters
     
@@ -80,13 +80,13 @@ private class CourseShareURL: NSObject, UIActivityItemSource {
         return courseShareURL
     }
     
-    fileprivate func activityViewController(_ activityViewController: UIActivityViewController, itemForActivityType activityType: UIActivity.ActivityType?) -> Any? {
+    fileprivate func activityViewController(_ activityViewController: UIActivityViewController, itemForActivityType activityType: UIActivityType?) -> Any? {
         
         var shareURL: String = courseShareURL.absoluteString ?? ""
-        if activityType == UIActivity.ActivityType.postToFacebook, let utmParams = courseShareUtmParams.facebook {
+        if activityType == UIActivityType.postToFacebook, let utmParams = courseShareUtmParams.facebook {
             shareURL = String(format:"%@?%@",courseShareURL, utmParams)
         }
-        else if activityType == UIActivity.ActivityType.postToTwitter, let utmParams = courseShareUtmParams.twitter{
+        else if activityType == UIActivityType.postToTwitter, let utmParams = courseShareUtmParams.twitter{
             shareURL = String(format:"%@?%@",courseShareURL, utmParams)
         }
         

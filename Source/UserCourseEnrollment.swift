@@ -11,13 +11,13 @@ import edXCore
 
 //TODO: remove NSObject when done with @objc
 public class UserCourseEnrollment : NSObject {
-    let created: String?
-    let mode: String?
+    @objc let created: String?
+    @objc let mode: String?
     @objc let isActive: Bool
     @objc let course: OEXCourse
 
     /** Url if the user has completed a certificate */
-    let certificateUrl: String?
+    @objc let certificateUrl: String?
 
     @objc init?(dictionary: [String: Any]) {
         created = dictionary["created"] as? String
@@ -32,7 +32,7 @@ public class UserCourseEnrollment : NSObject {
         }
         
         if let dictCourse = dictionary["course"] as? [NSObject: AnyObject] {
-            course = OEXCourse(dictionary: dictCourse, auditExpiryDate: dictionary["audit_access_expires"] as? String)
+            course = OEXCourse(dictionary:dictCourse)
         } else {
             course = OEXCourse()
             super.init()
@@ -42,7 +42,7 @@ public class UserCourseEnrollment : NSObject {
         super.init()
     }
     
-    init(course: OEXCourse, created: String? = nil, mode: String? = nil, isActive: Bool = true, certificateURL: String? = nil) {
+    @objc init(course: OEXCourse, created: String? = nil, mode: String? = nil, isActive: Bool = true, certificateURL: String? = nil) {
         self.created = created
         self.mode = mode
         self.course = course

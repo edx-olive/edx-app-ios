@@ -20,11 +20,10 @@ class StartupViewController: UIViewController, InterfaceOrientationOverriding {
     private let searchView = UIView()
     private let messageLabel = UILabel()
     fileprivate let environment: Environment
-    private let bottomBar: BottomBarView
-    
+
     init(environment: Environment) {
         self.environment = environment
-        bottomBar = BottomBarView(environment: environment)
+
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -38,8 +37,6 @@ class StartupViewController: UIViewController, InterfaceOrientationOverriding {
         setupMessageLabel()
         setupSearchView()
         setupBottomBar()
-
-        view.backgroundColor = environment.styles.standardBackgroundColor()
         
         let tapGesture = UITapGestureRecognizer()
         tapGesture.addAction { [weak self] _ in
@@ -54,10 +51,6 @@ class StartupViewController: UIViewController, InterfaceOrientationOverriding {
         super.viewDidAppear(animated)
         environment.analytics.trackScreen(withName: OEXAnalyticsScreenLaunch)
     }
-    
-    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
-        bottomBar.updateContraints()
-    }
 
     override var shouldAutorotate: Bool {
         return true
@@ -70,7 +63,7 @@ class StartupViewController: UIViewController, InterfaceOrientationOverriding {
     // MARK: - View Setup
 
     private func keyboardWillShow(notification: NSNotification) {
-        if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
+        if let keyboardSize = (notification.userInfo?[UIKeyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
             if view.frame.size.height - (searchView.frame.origin.y + searchView.frame.size.height) < keyboardSize.height  {
                 let difference = keyboardSize.height - (view.frame.size.height - (searchView.frame.origin.y + searchView.frame.size.height)) + StandardVerticalMargin
                 view.frame.origin.y = -difference
@@ -83,11 +76,11 @@ class StartupViewController: UIViewController, InterfaceOrientationOverriding {
     }
 
     private func addObservers() {
-        NotificationCenter.default.oex_addObserver(observer: self, name: UIResponder.keyboardDidShowNotification.rawValue) { (notification, observer, _) in
+        NotificationCenter.default.oex_addObserver(observer: self, name: NSNotification.Name.UIKeyboardDidShow.rawValue) { (notification, observer, _) in
             observer.keyboardWillShow(notification: notification)
         }
 
-        NotificationCenter.default.oex_addObserver(observer: self, name: UIResponder.keyboardWillHideNotification.rawValue) { (_, observer, _) in
+        NotificationCenter.default.oex_addObserver(observer: self, name: NSNotification.Name.UIKeyboardWillHide.rawValue) { (_, observer, _) in
             observer.keyboardWillHide()
         }
     }
@@ -96,28 +89,17 @@ class StartupViewController: UIViewController, InterfaceOrientationOverriding {
         let logo = UIImage(named: "logo")
         logoImageView.image = logo
         logoImageView.contentMode = .scaleAspectFit
-        logoImageView.isAccessibilityElement = false
-        
-        // In iOS 13+ voice over trying to read the possible text of the accessibility element when the accessibility element is the image.
-        // To overcome this issue, the logo image is placed in a container and accessibility set on that container
-        let imageContainer = UIView()
-        imageContainer.addSubview(logoImageView)
-        imageContainer.accessibilityLabel = environment.config.platformName()
-        imageContainer.isAccessibilityElement = true
-        imageContainer.accessibilityIdentifier = "StartUpViewController:logo-image-view"
-        imageContainer.accessibilityHint = Strings.accessibilityImageVoiceOverHint
-        
-        view.addSubview(imageContainer)
-        
-        imageContainer.snp.makeConstraints { make in
+        logoImageView.accessibilityLabel = environment.config.platformName()
+        logoImageView.isAccessibilityElement = true
+        logoImageView.accessibilityTraits = UIAccessibilityTraitImage
+        logoImageView.accessibilityIdentifier = "StartUpViewController:logo-image-view"
+        view.addSubview(logoImageView)
+
+        logoImageView.snp.makeConstraints { make in
             make.leading.equalTo(safeLeading).offset(2*StandardHorizontalMargin)
             make.centerY.equalTo(view.snp.bottom).dividedBy(6.0)
             make.width.equalTo((logo?.size.width ?? 0) / 2)
             make.height.equalTo((logo?.size.height ?? 0) / 2)
-        }
-        
-        logoImageView.snp.remakeConstraints { (make) in
-            make.center.edges.equalTo(imageContainer)
         }
     }
 
@@ -136,10 +118,6 @@ class StartupViewController: UIViewController, InterfaceOrientationOverriding {
     }
     
     private func setupSearchView() {
-        let courseEnrollmentEnabled = environment.config.discovery.course.isEnabled
-        guard courseEnrollmentEnabled ||
-            environment.config.discovery.program.isEnabled else { return }
-        
         view.addSubview(searchView)
         let borderStyle = BorderStyle(cornerRadius: .Size(CornerRadius), width: .Size(1), color: environment.styles.primaryBaseColor())
         searchView.applyBorderStyle(style: borderStyle)
@@ -169,11 +147,16 @@ class StartupViewController: UIViewController, InterfaceOrientationOverriding {
         let searchTextField = UITextField()
         searchTextField.accessibilityIdentifier = "StartUpViewController:search-textfield"
         searchTextField.delegate = self
-        let placeholderText = courseEnrollmentEnabled ? Strings.searchCoursesPlaceholderText : Strings.searchProgramsPlaceholderText
-        searchTextField.attributedPlaceholder = textStyle.attributedString(withText: placeholderText)
+        searchTextField.attributedPlaceholder = textStyle.attributedString(withText: Strings.Startup.searchPlaceholderText)
         searchTextField.textColor = environment.styles.primaryBaseColor()
         searchTextField.returnKeyType = .search
-        searchTextField.defaultTextAttributes = environment.styles.textFieldStyle(with: .large, color: environment.styles.primaryBaseColor()).attributes.attributedKeyDictionary()
+        
+        var defaultTextAttributes = [String: Any]()
+        for (key, value) in environment.styles.textFieldStyle(with: .large, color: environment.styles.primaryBaseColor()).attributes {
+            defaultTextAttributes[key.rawValue] = value
+        }
+
+        searchTextField.defaultTextAttributes = defaultTextAttributes
         searchView.addSubview(searchTextField)
         
         searchTextField.snp.makeConstraints { make in
@@ -184,12 +167,14 @@ class StartupViewController: UIViewController, InterfaceOrientationOverriding {
     }
 
     private func setupBottomBar() {
+        let bottomBar = BottomBarView(environment: environment)
         view.addSubview(bottomBar)
         bottomBar.snp.makeConstraints { make in
             make.bottom.equalTo(safeBottom)
             make.leading.equalTo(safeLeading)
             make.trailing.equalTo(safeTrailing)
         }
+
     }
 
     fileprivate func showCourses(with searchQuery: String?) {
@@ -198,38 +183,32 @@ class StartupViewController: UIViewController, InterfaceOrientationOverriding {
     }
 }
 
-public class BottomBarView: UIView, NSCopying {
+private class BottomBarView: UIView, NSCopying {
     typealias Environment = OEXRouterProvider & OEXStylesProvider
     private var environment : Environment?
-    private let bottomBar = TZStackView()
-    private let signInButton = UIButton()
-    private let registerButton = UIButton()
-
+    
     init(frame: CGRect = CGRect.zero, environment:Environment?) {
         super.init(frame:frame)
         self.environment = environment
         makeBottomBar()
-        addObserver()
-    }
-    
-    func addObserver() {
-        NotificationCenter.default.oex_addObserver(observer: self, name: NOTIFICATION_DYNAMIC_TEXT_TYPE_UPDATE) {(_, observer, _) in
-            observer.updateContraints()
-        }
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    public func copy(with zone: NSZone? = nil) -> Any {
+    func copy(with zone: NSZone? = nil) -> Any {
         let copy = BottomBarView(environment: environment)
         return copy
     }
     
     private func makeBottomBar() {
+        let bottomBar = UIView()
+        let signInButton = UIButton()
+        let registerButton = UIButton()
 
         bottomBar.backgroundColor = environment?.styles.standardBackgroundColor()
+        
         let signInBorderStyle = BorderStyle(cornerRadius: .Size(CornerRadius), width: .Size(1), color: environment?.styles.primaryBaseColor())
         signInButton.applyBorderStyle(style: signInBorderStyle)
         signInButton.accessibilityIdentifier = "StartUpViewController:sign-in-button"
@@ -250,49 +229,31 @@ public class BottomBarView: UIView, NSCopying {
         registerButton.oex_addAction({ [weak self] _ in
             self?.showRegistration()
             }, for: .touchUpInside, analyticsEvent: signUpEvent)
-    
-        bottomBar.spacing = 10
-        bottomBar.addArrangedSubview(registerButton)
-        bottomBar.layoutMarginsRelativeArrangement = true
-        bottomBar.addArrangedSubview(signInButton)
         
+        bottomBar.addSubview(registerButton)
+        bottomBar.addSubview(signInButton)
+
         addSubview(bottomBar)
-        updateContraints()
-    }
-    
-    fileprivate func updateContraints() {
+
         bottomBar.snp.makeConstraints { make in
             make.edges.equalTo(self)
+            make.height.equalTo(BottomBarHeight)
         }
         
-        if registerButton.titleLabel?.font.isPreferredSizeLarge ?? false  && !(UIDevice.current.orientation.isLandscape) {
-            signInButton.snp.removeConstraints()
-            registerButton.snp.removeConstraints()
-            bottomBar.axis = .vertical
-            bottomBar.snp.remakeConstraints { make in
-                make.edges.equalTo(self)
-            }
-        } else {
-            bottomBar.axis = .horizontal
-            bottomBar.snp.remakeConstraints { make in
-                make.edges.equalTo(self)
-                make.height.equalTo(BottomBarHeight)
-            }
-            
-            signInButton.snp.makeConstraints { make in
-                make.top.equalTo(bottomBar).offset(BottomBarMargin)
-                make.bottom.equalTo(bottomBar).offset(-BottomBarMargin)
-                make.trailing.equalTo(bottomBar).offset(-BottomBarMargin)
-                make.width.equalTo(95)
-            }
-            
-            registerButton.snp.makeConstraints { make in
-                make.top.equalTo(bottomBar).offset(BottomBarMargin)
-                make.bottom.equalTo(bottomBar).offset(-BottomBarMargin)
-                make.leading.equalTo(bottomBar).offset(BottomBarMargin)
-                make.trailing.equalTo(signInButton.snp.leading).offset(-BottomBarMargin)
-            }
+        signInButton.snp.makeConstraints { make in
+            make.top.equalTo(bottomBar).offset(BottomBarMargin)
+            make.bottom.equalTo(bottomBar).offset(-BottomBarMargin)
+            make.trailing.equalTo(bottomBar).offset(-BottomBarMargin)
+            make.width.equalTo(95)
         }
+        
+        registerButton.snp.makeConstraints { make in
+            make.top.equalTo(bottomBar).offset(BottomBarMargin)
+            make.bottom.equalTo(bottomBar).offset(-BottomBarMargin)
+            make.leading.equalTo(bottomBar).offset(BottomBarMargin)
+            make.trailing.equalTo(signInButton.snp.leading).offset(-BottomBarMargin)
+        }
+
     }
     
     //MARK: - Actions

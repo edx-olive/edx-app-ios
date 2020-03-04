@@ -9,6 +9,21 @@
 import XCTest
 @testable import edX
 
+class ListenableObject : NSObject {
+    var backing : String = ""
+    
+    var value : String {
+        get {
+            return backing
+        }
+        set {
+            self.willChangeValue(forKey: "value")
+            self.backing = newValue
+            self.didChangeValue(forKey: "value")
+        }
+    }
+}
+
 class KVOListenerTests: XCTestCase {
     
     func testListening() {
@@ -23,7 +38,7 @@ class KVOListenerTests: XCTestCase {
         waitForExpectations()
         remover.remove()
     }
-
+    
     func testRemoval() {
         let observed = ListenableObject()
         let remover = observed.oex_addObserver(observer: self, forKeyPath: "value") { (observer, object, value) -> Void in

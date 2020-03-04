@@ -60,7 +60,7 @@ class ProfileBanner: UIView {
             addSubview(changeButton)
 
             changeButton.setIconAndTitle(icon: Icon.Camera, title: Strings.Profile.changePictureButton)
-            changeButton.setAccessibility(with: UIAccessibilityTraits.button, hint: Strings.Profile.changePictureAccessibilityHint)
+            changeButton.accessibilityHint = Strings.Profile.changePictureAccessibilityHint
             
             changeButton.snp.makeConstraints { make in
                 make.centerY.equalTo(shortProfView)

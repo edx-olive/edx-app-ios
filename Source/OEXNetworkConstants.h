@@ -26,6 +26,7 @@
 
 #define URL_EXCHANGE_TOKEN @"/oauth2/exchange_access_token/{backend}/"
 #define URL_USER_DETAILS @"/api/mobile/v0.5/users"
+#define URL_COURSE_ENROLLMENTS @"/course_enrollments/"
 #define URL_COURSE_HANDOUTS @"/handouts"
 #define URL_COURSE_ANNOUNCEMENTS @"/updates"
 #define URL_RESET_PASSWORD  @"/password_reset/"
@@ -36,5 +37,6 @@
 #define URL_COURSE_ENROLLMENT @"/api/enrollment/v1/enrollment"
 #define URL_COURSE_ENROLLMENT_EMAIL_OPT_IN @"/api/user_api/v1/preferences/email_opt_in"
 #define SIGN_UP_URL @"/user_api/v1/account/registration/"
+#define SAML_PROVIDER_URL @"/auth/login/tpa-saml/?auth_entry={authEntry}&idp={idpSlug}"
 
 #endif

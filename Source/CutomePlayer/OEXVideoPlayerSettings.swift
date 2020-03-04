@@ -62,10 +62,9 @@ class VideoPlayerSettings : NSObject {
                 var rows = [RowType]()
                 for lang: String in transcripts.keys {
                     let locale = NSLocale(localeIdentifier: lang)
-                    if let displayLang: String = locale.displayName(forKey: NSLocale.Key.languageCode, value: lang) {
-                        let item: RowType = (title: displayLang, value: lang)
-                        rows.append(item)
-                    }
+                    let displayLang: String = locale.displayName(forKey: NSLocale.Key.languageCode, value: lang)!
+                    let item: RowType = (title: displayLang, value: lang)
+                    rows.append(item)
                 }
     
                 let cc = OEXVideoPlayerSetting(title: "Closed Captions", rows: rows, isSelected: { (row) -> Bool in

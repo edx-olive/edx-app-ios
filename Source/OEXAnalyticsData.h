@@ -45,7 +45,6 @@ extern NSString* const OEXAnalyticsKeyQueryString;
 #define key_target_url @"target_url"
 #define key_language @"language"
 #define key_rating @"rating"
-#define key_play_medium @"play_medium"
 
 // Values
 
@@ -54,7 +53,6 @@ extern NSString* const OEXAnalyticsKeyQueryString;
 #define value_mobile @"mobile"
 #define value_videoplayer @"videoplayer"
 #define value_downloadmodule @"downloadmodule"
-#define value_play_medium_youtube @"youtube"
 
 // Event Names
 

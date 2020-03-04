@@ -22,9 +22,9 @@ extension CourseBlockDisplayType {
 }
 
 // Container for scrolling horizontally between different screens of course content
-public class CourseContentPageViewController : UIPageViewController, UIPageViewControllerDataSource, UIPageViewControllerDelegate, CourseBlockViewController, InterfaceOrientationOverriding, ChromeCastButtonDelegate {
+public class CourseContentPageViewController : UIPageViewController, UIPageViewControllerDataSource, UIPageViewControllerDelegate, CourseBlockViewController, InterfaceOrientationOverriding {
     
-    public typealias Environment = OEXAnalyticsProvider & DataManagerProvider & OEXRouterProvider & OEXConfigProvider
+    public typealias Environment = OEXAnalyticsProvider & DataManagerProvider & OEXRouterProvider
     
     private let initialLoadController : LoadStateViewController
     private let environment : Environment
@@ -32,6 +32,8 @@ public class CourseContentPageViewController : UIPageViewController, UIPageViewC
     private var initialChildID : CourseBlockID?
     
     public private(set) var blockID : CourseBlockID?
+    
+    var videoPlayer: VideoPlayer
     
     public var courseID : String {
         return courseQuerier.courseID
@@ -49,16 +51,19 @@ public class CourseContentPageViewController : UIPageViewController, UIPageViewC
     ///Removes the ViewControllers from memory in case of a memory warning
     private let cacheManager : BlockViewControllerCacheManager
     private var transitionInProgress: Bool = false
+    private var languageOptionsButton = UIBarButtonItem(barButtonSystemItem: .add, target: nil, action:nil)
+    
     public init(environment : Environment, courseID : CourseBlockID, rootID : CourseBlockID?, initialChildID: CourseBlockID? = nil, forMode mode: CourseOutlineMode) {
         self.environment = environment
         self.blockID = rootID
         self.initialChildID = initialChildID
         
-        courseQuerier = environment.dataManager.courseDataManager.querierForCourseWithID(courseID: courseID, environment: environment)
+        courseQuerier = environment.dataManager.courseDataManager.querierForCourseWithID(courseID: courseID)
         initialLoadController = LoadStateViewController()
         
-        cacheManager = BlockViewControllerCacheManager.shared
+        cacheManager = BlockViewControllerCacheManager()
         courseOutlineMode = mode
+        self.videoPlayer = VideoPlayer(environment: environment as! VideoPlayer.Environment)
         super.init(transitionStyle: .scroll, navigationOrientation: .horizontal, options: nil)
         self.setViewControllers([initialLoadController], direction: .forward, animated: false, completion: nil)
         self.dataSource = self
@@ -77,8 +82,8 @@ public class CourseContentPageViewController : UIPageViewController, UIPageViewC
         super.viewWillAppear(animated)
         self.navigationController?.setToolbarHidden(false, animated: animated)
         courseQuerier.blockWithID(id: blockID).extendLifetimeUntilFirstResult (success:
-            {[weak self] block in
-                self?.environment.analytics.trackScreen(withName: OEXAnalyticsScreenUnitDetail, courseID: self?.courseID ?? "", value: block.internalName)
+            { block in
+                self.environment.analytics.trackScreen(withName: OEXAnalyticsScreenUnitDetail, courseID: self.courseID, value: block.internalName)
             },
             failure: {
                 Logger.logError("ANALYTICS", "Unable to load block: \($0)")
@@ -96,7 +101,7 @@ public class CourseContentPageViewController : UIPageViewController, UIPageViewC
     
     public override func viewDidLoad() {
         super.viewDidLoad()
-        
+        self.languageOptionsButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action:#selector(CourseContentPageViewController.showLanguageOptions))
         view.backgroundColor = OEXStyles.shared().standardBackgroundColor()
         
         
@@ -105,12 +110,10 @@ public class CourseContentPageViewController : UIPageViewController, UIPageViewC
         // Filed http://www.openradar.appspot.com/radar?id=6188034965897216 against Apple to better expose
         // this API.
         // Verified on iOS9 and iOS 8
-        if let scrollView = (view.subviews.compactMap { return $0 as? UIScrollView }).first {
+        if let scrollView = (self.view.subviews.compactMap { return $0 as? UIScrollView }).first {
             scrollView.delaysContentTouches = false
         }
         addObservers()
-        
-        ChromeCastManager.shared.removeChromeCastButton(from: self, force: true)
     }
     
     private func addStreamListeners() {
@@ -178,7 +181,7 @@ public class CourseContentPageViewController : UIPageViewController, UIPageViewC
     
     private func toolbarItemWithGroupItem(item : CourseOutlineQuerier.GroupItem, adjacentGroup : CourseBlock?, direction : DetailToolbarButton.Direction, enabled : Bool) -> UIBarButtonItem {
         let titleText : String
-        let moveDirection : UIPageViewController.NavigationDirection
+        let moveDirection : UIPageViewControllerNavigationDirection
         let isGroup = adjacentGroup != nil
         
         switch direction {
@@ -213,12 +216,19 @@ public class CourseContentPageViewController : UIPageViewController, UIPageViewC
                 // animation to make the push transition work right
                 let actions : () -> Void = {
                     self?.navigationItem.title = item.block.displayName
+                    self?.navigationItem.rightBarButtonItem = nil
+                    if self?.videoPlayer is YoutubeVideoPlayer{
+                        let transcript = (self?.videoPlayer as! YoutubeVideoPlayer).transcripts
+                        if transcript.count > 1{
+                            self?.navigationItem.rightBarButtonItem = self?.languageOptionsButton
+                        }
+                    }
                 }
                 if let navigationBar = self?.navigationController?.navigationBar, let _ = self?.navigationItem.title {
                     let animated = self?.navigationItem.title != nil
 
                     UIView.transition(with: navigationBar,
-                                      duration: 0.3 * (animated ? 1.0 : 0.0), options: UIView.AnimationOptions.transitionCrossDissolve,
+                                      duration: 0.3 * (animated ? 1.0 : 0.0), options: UIViewAnimationOptions.transitionCrossDissolve,
                                       animations: actions, completion: nil)
                 }
                 else {
@@ -242,17 +252,13 @@ public class CourseContentPageViewController : UIPageViewController, UIPageViewC
     
     // MARK: Paging
     
-    private func siblingWithDirection(direction : UIPageViewController.NavigationDirection, fromController viewController: UIViewController) -> UIViewController? {
+    private func siblingWithDirection(direction : UIPageViewControllerNavigationDirection, fromController viewController: UIViewController) -> UIViewController? {
         let item : CourseOutlineQuerier.GroupItem?
         switch direction {
         case .forward:
             item = contentLoader.value?.peekNext()
         case .reverse:
             item = contentLoader.value?.peekPrev()
-        @unknown default:
-            item = contentLoader.value?.peekPrev()
-            assert(false, "unknow case for CourseOutlineQuerier.GroupItem()")
-            break
         }
         return item.flatMap {
             controllerForBlock(block: $0.block)
@@ -273,19 +279,28 @@ public class CourseContentPageViewController : UIPageViewController, UIPageViewC
         self.updateNavigationBars()
     }
     
-    fileprivate func moveInDirection(direction : UIPageViewController.NavigationDirection) {
+    fileprivate func moveInDirection(direction : UIPageViewControllerNavigationDirection) {
         if let currentController = viewControllers?.first,
             let nextController = self.siblingWithDirection(direction: direction, fromController: currentController)
         {
-            setPageControllers(with: [nextController], direction: direction, animated: true, completion: { [weak self] (finished) in
+            var animationDirection = direction
+            if UIApplication.shared.userInterfaceLayoutDirection == .rightToLeft {
+                if direction == .forward {
+                    animationDirection = .reverse
+                }
+                else {
+                    animationDirection = .forward
+                }
+            }
+            setPageControllers(with: [nextController], direction: animationDirection, animated: true, completion: { [weak self] (finished) in
                 self?.updateTransitionState(is: false)
             })
         }
     }
     
-    private func setPageControllers(with controllers: [UIViewController], direction:UIPageViewController.NavigationDirection, animated:Bool, completion: ((Bool) -> Void)? = nil) {
-        // setViewControllers is being called in async thread and the user can intract with controls on screen while the controllers being set. It may result in a crash.
-        // Disabling the user interation with on screen controls while setting viewControllers of UIPageViewController to avoid crash
+    private func setPageControllers(with controllers: [UIViewController], direction:UIPageViewControllerNavigationDirection, animated:Bool, completion: ((Bool) -> Void)? = nil) {
+        // setViewControllers is being called in async thread so user may intract with UIPageController in that duration so
+        // disabling user interation while setting viewControllers of UIPageViewController
         
         if transitionInProgress { return }
         
@@ -301,7 +316,7 @@ public class CourseContentPageViewController : UIPageViewController, UIPageViewC
             })
         }
     }
-    
+
     private func updateTransitionState(is transitioning: Bool) {
         transitionInProgress = transitioning
         view.isUserInteractionEnabled = !transitioning
@@ -320,14 +335,15 @@ public class CourseContentPageViewController : UIPageViewController, UIPageViewC
         self.updateNavigationForEnteredController(controller: pageViewController.viewControllers?.first)
         updateTransitionState(is: false)
     }
-    
+
     public func pageViewController(_ pageViewController: UIPageViewController, willTransitionTo pendingViewControllers: [UIViewController]) {
         updateTransitionState(is: true)
-        
+
     }
     
     func controllerForBlock(block : CourseBlock) -> UIViewController? {
         let blockViewController : UIViewController?
+        self.videoPlayer = VideoPlayer(environment: environment as! VideoPlayer.Environment)
         
         if let cachedViewController = self.cacheManager.getCachedViewControllerForBlockID(blockID: block.blockID) {
             blockViewController = cachedViewController
@@ -335,7 +351,14 @@ public class CourseContentPageViewController : UIPageViewController, UIPageViewC
         else {
             // Instantiate a new VC from the router if not found in cache already
             if let viewController = self.environment.router?.controllerForBlock(block: block, courseID: courseQuerier.courseID) {
+                if block.displayType.isCacheable {
+                    cacheManager.addToCache(viewController: viewController, blockID: block.blockID)
+                }
                 blockViewController = viewController
+                
+                if blockViewController is VideoBlockViewController {
+                    self.videoPlayer = (blockViewController as! VideoBlockViewController).videoController
+                }
             }
             else {
                 blockViewController = UIViewController()
@@ -393,6 +416,20 @@ public class CourseContentPageViewController : UIPageViewController, UIPageViewC
         if let block = contentLoader.value?.peekPrev()?.block {
             preloadBlock(block: block)
         }
+    }
+    
+    @objc func showLanguageOptions() {
+        let transcript = (self.videoPlayer as! YoutubeVideoPlayer).transcripts
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        
+        for (key, _) in transcript{
+            let language = key as! String
+            let locale = NSLocale(localeIdentifier: language)
+            alert.addAction(UIAlertAction(title: locale.displayName(forKey: NSLocale.Key.identifier, value: language), style: .default) { _ in
+                (self.videoPlayer as! YoutubeVideoPlayer).setCaption(language: language)
+            })
+        }
+        self.present(alert, animated: true)
     }
 }
 

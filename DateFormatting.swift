@@ -47,7 +47,7 @@ open class DateFormatting: NSObject {
     }
     
     /// Format like April 11 or January 23
-    open class func format(asMonthDayString date: NSDate?) -> String? {
+    @objc open class func format(asMonthDayString date: NSDate?) -> String? {
         guard let date = date else { return nil }
         
         let formatter = DateFormatter()
@@ -65,7 +65,7 @@ open class DateFormatting: NSObject {
         return formatter.string(from: date as Date)
     }
     
-    open class func format(asDateMonthYearString date: NSDate) -> String {
+    @objc  open class func format(asDateMonthYearString date: NSDate) -> String {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         
@@ -83,7 +83,7 @@ open class DateFormatting: NSObject {
         return formatter.string(from: date as Date)
     }
     
-    open class func getDate(withFormat format: String, date: Date) -> Date {
+    @objc open class func getDate(withFormat format: String, date: Date) -> Date {
         let formatter = DateFormatter()
         formatter.dateFormat = format
         let dateString = formatter.string(from: date )
@@ -93,7 +93,7 @@ open class DateFormatting: NSObject {
     }
     
     /// Format like 12:00 if same day otherwise April 11, 2013
-    open class func format(asMinHourOrMonthDayYearString date: NSDate) -> String {
+    @objc open class func format(asMinHourOrMonthDayYearString date: NSDate) -> String {
         let formatter = DateFormatter()
         formatter.timeZone = TimeZone.current
         let order = compareTwoDates(fromDate: getDate(withFormat: "MMM dd, yyyy", date: Date()), toDate: getDate(withFormat: "MMM dd, yyyy", date: date as Date))
@@ -102,7 +102,7 @@ open class DateFormatting: NSObject {
     }
     
     /// Get the order of two dates comparison
-    open class func compareTwoDates(fromDate date: Date, toDate: Date) -> ComparisonResult {
+    @objc open class func compareTwoDates(fromDate date: Date, toDate: Date) -> ComparisonResult {
         if(date > toDate) {
             return ComparisonResult.orderedDescending
         }
@@ -114,7 +114,7 @@ open class DateFormatting: NSObject {
     }
     
     /// Get the time zone abbreivation like PKT, EDT
-    open class func timeZoneAbbriviation() -> String {
+    @objc open class func timeZoneAbbriviation() -> String {
         let formatter = DateFormatter()
         formatter.timeZone = TimeZone.current
         formatter.locale = Locale.current

@@ -34,7 +34,7 @@ class YoutubeVideoPlayerTests: XCTestCase {
         let video = OEXHelperVideoDownload()
         video.summary = summary
         youtubeVideoPlayer?.play(video: video)
-        XCTAssertEqual("abc123", youtubeVideoPlayer?.videoID)
+        XCTAssertEqual("abc123", youtubeVideoPlayer?.videoId)
     }
     
     func testVideoPlayerProtraitView() {

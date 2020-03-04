@@ -33,7 +33,7 @@ public class CourseOutlineItemView: UIView {
     private let titleLabel = UILabel()
     private let subtitleLabel = UILabel()
     private let videoSizeLabel = UILabel()
-    private let leadingImageButton = UIButton(type: UIButton.ButtonType.system)
+    private let leadingImageButton = UIButton(type: UIButtonType.system)
     private let checkmark = UIImageView()
     private let trailingContainer = UIView()
     
@@ -71,7 +71,7 @@ public class CourseOutlineItemView: UIView {
         leadingImageButton.setContentCompressionResistancePriority(UILayoutPriority.defaultHigh, for: .horizontal)
         trailingContainer.setContentCompressionResistancePriority(UILayoutPriority.defaultHigh, for: .horizontal)
         
-        leadingImageButton.accessibilityTraits = UIAccessibilityTraits.image
+        leadingImageButton.accessibilityTraits = UIAccessibilityTraitImage
         titleLabel.setContentHuggingPriority(UILayoutPriority.defaultLow, for: .horizontal)
         
         checkmark.image = Icon.Graded.imageWithFontSize(size: 10)
@@ -116,8 +116,6 @@ public class CourseOutlineItemView: UIView {
             let formattedDateString = formattedDueDateString(asMonthDay: DateFormatting.date(withServerString: dueDate))
             attributedStrings.append(CourseOutlineItemView.detailFontStyle.attributedString(withText: formattedDateString))
         }
-        subtitleLabel.adjustsFontSizeToFitWidth = true
-        subtitleLabel.minimumScaleFactor = 0.6
         subtitleLabel.attributedText = NSAttributedString.joinInNaturalLayout(attributedStrings: attributedStrings)
         videoSizeLabel.attributedText = CourseOutlineItemView.detailFontStyle.attributedString(withText: videoSize)
         resetContraints(withBlockType: blockType)
@@ -173,8 +171,6 @@ public class CourseOutlineItemView: UIView {
             {
                 make.leading.equalTo(checkmark.snp.leading).offset(0)
             }
-
-            make.trailing.lessThanOrEqualTo(self).offset(-StandardHorizontalMargin)
         }
     }
     

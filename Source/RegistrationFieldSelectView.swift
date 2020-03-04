@@ -21,11 +21,11 @@ class RegistrationFieldSelectView: RegistrationFormFieldView, UIPickerViewDelega
         return OEXTextStyle(weight: .normal, size: .base, color: OEXStyles.shared().neutralDark())
     }
     
-    override var currentValue: String {
+    @objc override var currentValue: String {
         return tapButton.attributedTitle(for: .normal)?.string ?? ""
     }
     
-    override init(with formField: OEXRegistrationFormField) {
+    @objc override init(with formField: OEXRegistrationFormField) {
         super.init(with: formField)
     }
     
@@ -48,7 +48,7 @@ class RegistrationFieldSelectView: RegistrationFormFieldView, UIPickerViewDelega
         textInputField.rightView = dropdownView
         tapButton.oex_addAction({[weak self] _ in
             self?.makeFirstResponder()
-            }, for: UIControl.Event.touchUpInside)
+            }, for: UIControlEvents.touchUpInside)
         self.addSubview(tapButton)
         
         tapButton.snp.makeConstraints { make in
@@ -58,7 +58,7 @@ class RegistrationFieldSelectView: RegistrationFormFieldView, UIPickerViewDelega
             make.bottom.equalTo(textInputField)
         }
         let insets = OEXStyles.shared().standardTextViewInsets
-        tapButton.titleEdgeInsets = UIEdgeInsets.init(top: 0, left: insets.left, bottom: 0, right: insets.right)
+        tapButton.titleEdgeInsets = UIEdgeInsetsMake(0, insets.left, 0, insets.right)
         refreshAccessibilty()
     }
     
@@ -71,7 +71,7 @@ class RegistrationFieldSelectView: RegistrationFormFieldView, UIPickerViewDelega
         
         let errorAccessibility = errorMessage ?? "" != "" ? ",\(Strings.Accessibility.errorText), \(errorMessage ?? "")" : ""
         tapButton.accessibilityLabel = String(format: "%@, %@", formField.label, Strings.accessibilityDropdownTrait)
-        tapButton.accessibilityTraits = UIAccessibilityTraits.none
+        tapButton.accessibilityTraits = UIAccessibilityTraitNone
         let accessibilitHintText = isRequired ? String(format: "%@, %@, %@, %@", Strings.accessibilityRequiredInput,formField.instructions, errorAccessibility , Strings.accessibilityShowsDropdownHint) : String(format: "%@, %@, %@, %@", Strings.Accessibility.optionalInput,formField.instructions,errorAccessibility , Strings.accessibilityShowsDropdownHint)
         tapButton.accessibilityHint = accessibilitHintText
         textInputField.isAccessibilityElement = false
@@ -91,7 +91,7 @@ class RegistrationFieldSelectView: RegistrationFormFieldView, UIPickerViewDelega
     override var inputView : UIView {
         return picker
     }
-
+      
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -105,27 +105,26 @@ class RegistrationFieldSelectView: RegistrationFormFieldView, UIPickerViewDelega
     }
 
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-        return options[row].name
+        return self.options[row].name
     }
     
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        selected = options[row]
-        if let selected = selected, !selected.value.isEmpty {
+        self.selected = self.options[row]
+        if let selected = self.selected, !selected.value.isEmpty {
             setButtonTitle(title: selected.name)
         }
         else {
             setButtonTitle(title: "")
         }
-        endEditing(true)
         valueDidChange()
     }
     
-    func makeFirstResponder() {
-        becomeFirstResponder()
-        UIAccessibility.post(notification: UIAccessibility.Notification.layoutChanged, argument: picker)
+    @objc func makeFirstResponder() {
+        self.becomeFirstResponder()
+            UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, self.picker)
     }
     
-    override func validate() -> String? {
+    @objc override func validate() -> String? {
         guard let field = formField else {
             return nil
         }

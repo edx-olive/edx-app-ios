@@ -69,9 +69,6 @@ public enum AnalyticsScreenName: String {
     case ViewResponseComments = "Forum: View Response Comments"
     case CourseVideos = "Videos: Course Videos"
     case SubjectsDiscovery = "Discover: All Subjects"
-    case DiscoverProgram = "Find Programs"
-    case DiscoverDegree = "Find Degrees"
-    case ProgramInfo = "Program Info"
 }
 
 public enum AnalyticsEventDataKey: String {

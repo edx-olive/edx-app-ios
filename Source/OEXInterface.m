@@ -31,6 +31,7 @@
 #import "OEXSession.h"
 #import "OEXStorageFactory.h"
 #import "OEXUserDetails.h"
+#import "OEXVideoPathEntry.h"
 #import "OEXVideoSummary.h"
 #import "Reachability.h"
 #import "VideoData.h"
@@ -114,6 +115,8 @@ static OEXInterface* _sharedInterface = nil;
 }
 
 - (void)backgroundInit {
+    //course details
+    self.courses = [self parsedObjectWithData:[self resourceDataForURLString:[_network URLStringForType:URL_COURSE_ENROLLMENTS] downloadIfNotAvailable:NO] forURLString:[_network URLStringForType:URL_COURSE_ENROLLMENTS]];
 
     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
         [self resumePausedDownloads];
@@ -140,6 +143,9 @@ static OEXInterface* _sharedInterface = nil;
     if([URLString isEqualToString:[self URLStringForType:URL_USER_DETAILS]]) {
         return [self.parser userDetailsWithData:data];
     }
+    else if([URLString isEqualToString:[self URLStringForType:URL_COURSE_ENROLLMENTS]]) {
+        return [self.parser userCourseEnrollmentsWithData:data];
+    }
     else if([URLString rangeOfString:URL_COURSE_ANNOUNCEMENTS].location != NSNotFound) {
         return [self.parser announcementsWithData:data];
     }
@@ -155,6 +161,9 @@ static OEXInterface* _sharedInterface = nil;
 
     if([type isEqualToString:URL_USER_DETAILS]) {
         [URLString appendFormat:@"%@/%@", URL_USER_DETAILS, [OEXSession sharedSession].currentUser.username];
+    }
+    else if([type isEqualToString:URL_COURSE_ENROLLMENTS]) {
+        URLString = [self formatEnrollmentURLWith:[OEXConfig sharedConfig] url:URLString];
     }
     else {
         return nil;
@@ -271,6 +280,9 @@ static OEXInterface* _sharedInterface = nil;
         case 0:
             [self downloadWithRequestString:URL_USER_DETAILS forceUpdate:YES];
             break;
+        case 1:
+            [self downloadWithRequestString:URL_COURSE_ENROLLMENTS forceUpdate:YES];
+            break;
         default:
             _commonDownloadProgress = -1;
             break;
@@ -291,6 +303,9 @@ static OEXInterface* _sharedInterface = nil;
 
     if([URLString isEqualToString:URL_USER_DETAILS]) {
         URLString = [_network URLStringForType:URL_USER_DETAILS];
+    }
+    else if([URLString isEqualToString:URL_COURSE_ENROLLMENTS]) {
+        URLString = [_network URLStringForType:URL_COURSE_ENROLLMENTS];
     }
     else if([OEXInterface isURLForImage:URLString]) {
         return NO;
@@ -348,24 +363,27 @@ static OEXInterface* _sharedInterface = nil;
     }
     totalSpaceRequired = totalSpaceRequired / 1024 / 1024 / 1024;
     if(!userAllowedLargeDownload && totalSpaceRequired > 1) {
-        [[UIAlertController alloc] showAlertWith:[Strings largeDownloadTitle] message:[Strings largeDownloadMessage] preferredStyle:UIAlertControllerStyleAlert cancelButtonTitle:[Strings cancel] destructiveButtonTitle:nil otherButtonsTitle:@[[Strings acceptLargeVideoDownload]] tapBlock:^(UIAlertController* _Nonnull alertController, UIAlertAction* _Nonnull alert, NSInteger buttonIndex) {
-            if(buttonIndex == 1) {
-                userAllowedLargeDownload = true;
-                NSInteger count = [self downloadVideos:videos];
-                if(count > 0) {
-                    [[NSNotificationCenter defaultCenter] postNotificationName:FL_MESSAGE
-                                                                        object:self
-                                                                      userInfo:@{FL_ARRAY: videos}];
-                }
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:[Strings largeDownloadTitle] message:[Strings largeDownloadMessage] preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:[Strings cancel] style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+            userAllowedLargeDownload = false;
+            if (downloadVideosCompletionHandler) {
+                downloadVideosCompletionHandler(true);
+                downloadVideosCompletionHandler = nil;
             }
-            else {
-                userAllowedLargeDownload = false;
-                if (downloadVideosCompletionHandler) {
-                    downloadVideosCompletionHandler(true);
-                    downloadVideosCompletionHandler = nil;
-                }
+
+        }]];
+        [alert addAction:[UIAlertAction actionWithTitle:[Strings acceptLargeVideoDownload] style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+            userAllowedLargeDownload = true;
+            NSInteger count = [self downloadVideos:videos];
+            if(count > 0) {
+                [[NSNotificationCenter defaultCenter] postNotificationName:FL_MESSAGE
+                                                                    object:self
+                                                                  userInfo:@{FL_ARRAY: videos}];
             }
-        } textFieldWithConfigurationHandler:nil];
+        }]];
+        
+        //TODO: nathan
+        //[self presentViewController:alert animated:YES completion:nil];
         
         return NO;
     }
@@ -413,7 +431,7 @@ static OEXInterface* _sharedInterface = nil;
     NSMutableDictionary* videos = [[NSMutableDictionary alloc] init];
     OEXCourse* course = [self courseWithID:courseID];
     
-    for(OEXHelperVideoDownload* video in [self.courseVideos objectForKey:course.course_id]) {
+    for(OEXHelperVideoDownload* video in [self.courseVideos objectForKey:course.video_outline]) {
         [videos setSafeObject:video forKey:video.summary.videoID];
     }
     return [videoIDs oex_map:^id(NSString* videoID) {
@@ -441,6 +459,13 @@ static OEXInterface* _sharedInterface = nil;
 
 - (float)lastPlayedIntervalForVideoID:(NSString*)videoID {
     return [_storage lastPlayedIntervalForVideoID:videoID];
+}
+
+- (void)markLastPlayedInterval:(float)playedInterval forVideoID:(NSString*)videoId {
+    if(playedInterval <= 0) {
+        return;
+    }
+    [_storage markLastPlayedInterval:playedInterval forVideoID:videoId];
 }
 
 - (void)deleteDownloadedVideo:(OEXHelperVideoDownload *)video shouldNotify:(BOOL) shouldNotify completionHandler:(void (^)(BOOL success))completionHandler {
@@ -492,18 +517,7 @@ static OEXInterface* _sharedInterface = nil;
     [_storage deleteUnregisteredItems];
 }
 
-- (VideoData*)videoDataForVideoID:(NSString*)videoID {
-    return [_storage videoDataForVideoID:videoID];
-}
-
-- (nullable VideoData*)insertVideoData:(OEXHelperVideoDownload*)helperVideo {
-    NSString *videoID = helperVideo.summary.videoID;
-    if (videoID == nil) { return nil; }
-    VideoData* videoData = [_storage videoDataForVideoID:videoID];
-    if (videoData != nil) {
-        return videoData;
-    }
-    
+- (VideoData*)insertVideoData:(OEXHelperVideoDownload*)helperVideo {
     return [_storage insertVideoData: @""
                                Title: helperVideo.summary.name
                                 Size: [NSString stringWithFormat:@"%.2f", [helperVideo.summary.size doubleValue]]
@@ -514,12 +528,37 @@ static OEXInterface* _sharedInterface = nil;
                              UnitURL: helperVideo.summary.unitURL
                             CourseID: helperVideo.course_id
                                 DMID: 0
-                         ChapterName: @""
-                         SectionName: @""
+                         ChapterName: helperVideo.summary.chapterPathEntry.name
+                         SectionName: helperVideo.summary.sectionPathEntry.name
                            TimeStamp: nil
                       LastPlayedTime: helperVideo.lastPlayedInterval
                               is_Reg: YES
                          PlayedState: helperVideo.watchedState];
+}
+
+#pragma mark Last Accessed
+
+- (OEXHelperVideoDownload*)lastAccessedSubsectionForCourseID:(NSString*)courseID {
+    LastAccessed* lastAccessed = [_storage lastAccessedDataForCourseID:courseID];
+
+    if(lastAccessed.course_id) {
+        for(UserCourseEnrollment* courseEnrollment in _courses) {
+            OEXCourse* course = courseEnrollment.course;
+
+            if([courseID isEqualToString:course.course_id]) {
+                for(OEXHelperVideoDownload* video in [_courseVideos objectForKey : course.video_outline]) {
+                    OEXLogInfo(@"LAST ACCESSED", @"video.subSectionID : %@", video.summary.sectionPathEntry.entryID);
+                    OEXLogInfo(@"LAST ACCESSED", @"lastAccessed.subsection_id : %@ \n *********************\n", lastAccessed.subsection_id);
+
+                    if([video.summary.sectionPathEntry.entryID isEqualToString:lastAccessed.subsection_id]) {
+                        return video;
+                    }
+                }
+            }
+        }
+    }
+
+    return nil;
 }
 
 #pragma mark Update Storage
@@ -694,7 +733,34 @@ static OEXInterface* _sharedInterface = nil;
             return;
         }
 
-        if(_commonDownloadProgress != -1) {
+        //download any additional data if required
+        else if([URLString isEqualToString:[self URLStringForType:URL_COURSE_ENROLLMENTS]]) {
+            self.courses = (NSArray*)object;
+            for(UserCourseEnrollment* courseEnrollment in _courses) {
+                OEXCourse* course = courseEnrollment.course;
+
+                //course enrolments, get images for background
+                NSString* courseImage = course.courseImageURL;
+                NSString* imageDownloadURL = [NSString stringWithFormat:@"%@%@", [OEXConfig sharedConfig].apiHostURL, courseImage];
+
+                BOOL force = NO;
+                if(_commonDownloadProgress != -1) {
+                    force = YES;
+                }
+
+                [self downloadWithRequestString:imageDownloadURL forceUpdate:force];
+
+                //course subsection
+                NSString* courseVideoDetails = course.video_outline;
+                [self downloadWithRequestString:courseVideoDetails forceUpdate:force];
+            }
+        }
+
+        //If not using common download mode
+        if(_commonDownloadProgress == -1) {
+            //Delegate call back
+        }
+        else {
             _commonDownloadProgress++;
             [self downloadNextItem];
         }
@@ -733,6 +799,7 @@ static OEXInterface* _sharedInterface = nil;
         OEXDownloadState downloadState = [data.download_state intValue];
         
         video.course_id = course.course_id;
+        video.course_url = course.video_outline;
         
         if(!data) {
             downloadState = OEXDownloadStateNew;
@@ -767,14 +834,14 @@ static OEXInterface* _sharedInterface = nil;
 
 - (void)addVideos:(NSArray*)videos forCourseWithID:(NSString*)courseID {
     OEXCourse* course = [self courseWithID:courseID];
-    NSMutableArray* videoDatas = [[_courseVideos objectForKey:course.course_id] mutableCopy];
+    NSMutableArray* videoDatas = [[_courseVideos objectForKey:course.video_outline] mutableCopy];
     NSMutableSet* knownVideoIDs = [[NSMutableSet alloc] init];
     NSMutableDictionary* videosMap = [[NSMutableDictionary alloc] init];
     if(videoDatas == nil) {
         // we don't have any videos for this course yet
         // so set it up
         videoDatas = [[NSMutableArray alloc] init];
-        [self.courseVideos setSafeObject:videoDatas forKey:course.course_id];
+        [self.courseVideos setSafeObject:videoDatas forKey:course.video_outline];
     }
     else {
         // we do have videos, so collect their IDs so we only add new ones
@@ -807,7 +874,7 @@ static OEXInterface* _sharedInterface = nil;
         }
     }];
     
-    [self.courseVideos setSafeObject:videoDatas forKey:course.course_id];
+    [self.courseVideos setSafeObject:videoDatas forKey:course.video_outline];
     
     [self makeRecordsForVideos:videoHelpers inCourse:course];
 }
@@ -820,7 +887,7 @@ static OEXInterface* _sharedInterface = nil;
         //Videos array
         NSMutableArray* videosArray = [[NSMutableArray alloc] init];
 
-        for(OEXHelperVideoDownload* video in [_courseVideos objectForKey : course.course_id]) {
+        for(OEXHelperVideoDownload* video in [_courseVideos objectForKey : course.video_outline]) {
             //Complete
             if(video.downloadState == OEXDownloadStateComplete && state == OEXDownloadStateComplete) {
                 [videosArray addObject:video];
@@ -849,12 +916,26 @@ static OEXInterface* _sharedInterface = nil;
     for(UserCourseEnrollment* courseEnrollment in _courses) {
         OEXCourse* course = courseEnrollment.course;
 
-        for(OEXHelperVideoDownload* video in [_courseVideos objectForKey : course.course_id]) {
+        for(OEXHelperVideoDownload* video in [_courseVideos objectForKey : course.video_outline]) {
             [mainArray addObject:video];
         }
     }
 
     return mainArray;
+}
+
+- (OEXHelperVideoDownload*)getSubsectionNameForSubsectionID:(NSString*)subsectionID {
+    for(UserCourseEnrollment* courseEnrollment in _courses) {
+        OEXCourse* course = courseEnrollment.course;
+
+        for(OEXHelperVideoDownload* video in [_courseVideos objectForKey : course.video_outline]) {
+            if([video.summary.sectionPathEntry.entryID isEqualToString:subsectionID]) {
+                return video;
+            }
+        }
+    }
+
+    return nil;
 }
 
 - (NSArray*)allVideosForState:(OEXDownloadState)state {
@@ -863,7 +944,7 @@ static OEXInterface* _sharedInterface = nil;
     for(UserCourseEnrollment* courseEnrollment in _courses) {
         OEXCourse* course = courseEnrollment.course;
 
-        for(OEXHelperVideoDownload* video in [_courseVideos objectForKey : course.course_id]) {
+        for(OEXHelperVideoDownload* video in [_courseVideos objectForKey : course.video_outline]) {
             //Complete
             if((video.downloadProgress == OEXMaxDownloadProgress) && (state == OEXDownloadStateComplete)) {
                 [mainArray addObject:video];
@@ -985,7 +1066,7 @@ static OEXInterface* _sharedInterface = nil;
     // how we decide their order in the UI.
     // But once we switch to the new course structure endpoint, that will no longer be the case
     OEXCourse* course = [self courseWithID:courseID];
-    for(OEXHelperVideoDownload* video in [self.courseVideos objectForKey:course.course_id]) {
+    for(OEXHelperVideoDownload* video in [self.courseVideos objectForKey:course.video_outline]) {
         if([video.summary.videoID isEqual:videoID]) {
             return video;
         }
@@ -1005,29 +1086,18 @@ static OEXInterface* _sharedInterface = nil;
     return [_storage lastPlayedIntervalForVideoID:video.summary.videoID];
 }
 
-- (void)markVideoState:(OEXPlayedState)state forVideoID:(NSString*)videoID {
-    [self.storage markPlayedState:state forVideoID:videoID];
-}
-
 - (void)markVideoState:(OEXPlayedState)state forVideo:(OEXHelperVideoDownload*)video {
     for(OEXHelperVideoDownload* videoObj in [self allVideos]) {
         if([videoObj.summary.videoID isEqualToString:video.summary.videoID]) {
             videoObj.watchedState = state;
-            [self markVideoState:state forVideoID:video.summary.videoID];
+            [self.storage markPlayedState:state forVideoID:video.summary.videoID];
             [[NSNotificationCenter defaultCenter] postNotificationName:OEXVideoStateChangedNotification object:videoObj];
         }
     }
 }
 
 - (void)markLastPlayedInterval:(float)playedInterval forVideo:(OEXHelperVideoDownload*)video {
-    [self markLastPlayedInterval:playedInterval forVideoID:video.summary.videoID];
-}
-
-- (void)markLastPlayedInterval:(float)playedInterval forVideoID:(NSString*)videoId {
-    if(playedInterval <= 0) {
-        return;
-    }
-    [_storage markLastPlayedInterval:playedInterval forVideoID:videoId];
+    [_storage markLastPlayedInterval:playedInterval forVideoID:video.summary.videoID];
 }
 
 #pragma mark DownloadManagerDelegate
@@ -1073,9 +1143,102 @@ static OEXInterface* _sharedInterface = nil;
     return strdate;
 }
 
+- (void)updateLastVisitedModule:(NSString*)module forCourseID:(NSString*)courseID {
+    if(!module) {
+        return;
+    }
+
+    NSString* timestamp = [self getFormattedDate];
+
+    // Set to DB first and then depending on the response the DB gets updated
+    [self setLastAccessedDataToDB:module withTimeStamp:timestamp forCourseID:courseID];
+
+    NSString* path = [NSString stringWithFormat:@"/api/mobile/v0.5/users/%@/course_status_info/%@", [OEXSession sharedSession].currentUser.username, courseID];
+
+    NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@", [OEXConfig sharedConfig].apiHostURL, path]]];
+
+    [request setHTTPMethod:@"PATCH"];
+    NSString* authValue = [NSString stringWithFormat:@"%@", [OEXAuthentication authHeaderForApiAccess]];
+    [request setValue:authValue forHTTPHeaderField:@"Authorization"];
+    [request setValue:@"application/json; charset=utf-8" forHTTPHeaderField:@"Content-Type"];
+
+    NSDictionary* dictionary = @{
+        @"modification_date" : timestamp,
+        @"last_visited_module_id" : module
+    };
+    request.HTTPBody = [NSJSONSerialization dataWithJSONObject:dictionary options:0 error:nil];
+
+    NSURLSession* session = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration] delegate:nil delegateQueue:[NSOperationQueue mainQueue]];
+
+    [[session dataTaskWithRequest:request completionHandler:^(NSData* data, NSURLResponse* response, NSError* error) {
+            NSDictionary* dict = [NSJSONSerialization oex_JSONObjectWithData:data error:&error];
+
+            NSArray* visitedPath = [dict objectForKey:@"last_visited_module_path"];
+
+            NSString* subsectionID;
+
+            for(NSString * subs in visitedPath) {
+                if([subs rangeOfString:@"sequential"].location != NSNotFound) {
+                    subsectionID = [visitedPath objectAtIndex:2];
+                    break;
+                }
+            }
+
+            if(![module isEqualToString:subsectionID]) {
+                [self setLastAccessedDataToDB:subsectionID withTimeStamp:timestamp forCourseID:courseID];
+            }
+        }] resume];
+}
+
+- (void)setLastAccessedDataToDB:(NSString*)subsectionID withTimeStamp:(NSString*)timestamp forCourseID:(NSString*)courseID {
+    OEXHelperVideoDownload* video = [self getSubsectionNameForSubsectionID:subsectionID];
+    [self setLastAccessedSubSectionWithIDWithSubsectionID:subsectionID subsectionName: video.summary.sectionPathEntry.entryID courseID:courseID timeStamp:timestamp];
+}
+
+- (void)getLastVisitedModuleForCourseID:(NSString*)courseID {
+    NSString* path = [NSString stringWithFormat:@"/api/mobile/v0.5/users/%@/course_status_info/%@",
+                      [OEXSession sharedSession].currentUser.username, courseID];
+
+    NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@", [OEXConfig sharedConfig].apiHostURL, path]]];
+
+    [request setHTTPMethod:@"GET"];
+    NSString* authValue = [NSString stringWithFormat:@"%@", [OEXAuthentication authHeaderForApiAccess]];
+    [request setValue:authValue forHTTPHeaderField:@"Authorization"];
+    [request setValue:@"application/json; charset=utf-8" forHTTPHeaderField:@"Content-Type"];
+
+    NSURLSession* session = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration] delegate:nil delegateQueue:[NSOperationQueue mainQueue]];
+
+    [[session dataTaskWithRequest:request completionHandler:^(NSData* data, NSURLResponse* response, NSError* error) {
+            NSDictionary* dict = [NSJSONSerialization oex_JSONObjectWithData:data error:&error];
+
+            NSArray* visitedPath = [dict objectForKey:@"last_visited_module_path"];
+
+            NSString* subsectionID;
+
+            for(NSString * subs in visitedPath) {
+                if([subs rangeOfString:@"sequential"].location != NSNotFound) {
+                    subsectionID = subs;
+                    break;
+                }
+            }
+
+            if(subsectionID) {
+                NSString* timestamp = [self getFormattedDate];
+                // Set to DB first and then depending on the response the DB gets updated
+                [self setLastAccessedDataToDB:subsectionID withTimeStamp:timestamp forCourseID:courseID];
+
+                //Post notification
+                [[NSNotificationCenter defaultCenter] postNotificationName:NOTIFICATION_URL_RESPONSE
+                                                                    object:self
+                                                                  userInfo:@{NOTIFICATION_KEY_URL: NOTIFICATION_VALUE_URL_LASTACCESSED,
+                                                                             NOTIFICATION_KEY_STATUS: NOTIFICATION_VALUE_URL_STATUS_SUCCESS}];
+            }
+        }] resume];
+}
+
 #pragma mark - Analytics Call
 
-- (void)sendAnalyticsEvents:(OEXVideoState)state withCurrentTime:(NSTimeInterval)currentTime forVideo:(nullable OEXHelperVideoDownload*)video playMedium:(nullable NSString *)playMedium {
+- (void)sendAnalyticsEvents:(OEXVideoState)state withCurrentTime:(NSTimeInterval)currentTime forVideo:(OEXHelperVideoDownload*)video {
     if(isnan(currentTime)) {
         currentTime = 0;
     }
@@ -1097,8 +1260,7 @@ static OEXInterface* _sharedInterface = nil;
                 [[OEXAnalytics sharedAnalytics] trackVideoStop:video.summary.videoID
                                                    CurrentTime:currentTime
                                                       CourseID:video.course_id
-                                                       UnitURL:video.summary.unitURL
-                                                    playMedium:playMedium];
+                                                       UnitURL:video.summary.unitURL];
             }
 
             break;
@@ -1108,8 +1270,7 @@ static OEXInterface* _sharedInterface = nil;
                 [[OEXAnalytics sharedAnalytics] trackVideoPlaying:video.summary.videoID
                                                       CurrentTime:currentTime
                                                          CourseID:video.course_id
-                                                          UnitURL:video.summary.unitURL
-                                                       playMedium:playMedium];
+                                                          UnitURL:video.summary.unitURL];
             }
 
             break;
@@ -1120,8 +1281,7 @@ static OEXInterface* _sharedInterface = nil;
                 [[OEXAnalytics sharedAnalytics] trackVideoPause:video.summary.videoID
                                                     CurrentTime:currentTime
                                                        CourseID:video.course_id
-                                                        UnitURL:video.summary.unitURL
-                                                     playMedium:playMedium];
+                                                        UnitURL:video.summary.unitURL];
             }
 
             break;

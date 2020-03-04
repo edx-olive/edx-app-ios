@@ -1,1 +1,1 @@
-../../../Analytics/Analytics/Classes/Integrations/SEGTrackPayload.h
+../../../Analytics/Pod/Classes/Integrations/SEGTrackPayload.h

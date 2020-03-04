@@ -18,6 +18,6 @@ class DiscussionBlockViewControllerTests : XCTestCase {
         let discussionBlockController = DiscussionBlockViewController(blockID: "discussion", courseID: "some-course", topicID: discussionModel.topicID, environment: environment)
         discussionBlockController.view.setNeedsDisplay()
         
-        XCTAssertNotNil(discussionBlockController.children[0])
+        XCTAssertNotNil(discussionBlockController.childViewControllers[0])
     }
 }
