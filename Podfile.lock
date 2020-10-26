@@ -1,23 +1,18 @@
 PODS:
   - Analytics (3.0.7)
-  - Bolts (1.8.4):
-    - Bolts/AppLinks (= 1.8.4)
-    - Bolts/Tasks (= 1.8.4)
-  - Bolts/AppLinks (1.8.4):
-    - Bolts/Tasks
-  - Bolts/Tasks (1.8.4)
-  - Branch (0.25.5):
-    - Branch/Core (= 0.25.5)
-  - Branch/Core (0.25.5)
-  - Crashlytics (3.10.1):
-    - Fabric (~> 1.7.5)
+  - Branch (0.35.1)
+  - Crashlytics (3.14.0):
+    - Fabric (~> 1.10.2)
   - DateTools (1.6.1)
-  - Fabric (1.7.6)
-  - FBSDKCoreKit (4.31.1):
-    - Bolts (~> 1.7)
-  - FBSDKLoginKit (4.31.1):
-    - FBSDKCoreKit
-  - FBSnapshotTestCase/Core (2.0.1)
+  - Fabric (1.10.2)
+  - FBSDKCoreKit (5.5.0):
+    - FBSDKCoreKit/Basics (= 5.5.0)
+    - FBSDKCoreKit/Core (= 5.5.0)
+  - FBSDKCoreKit/Basics (5.5.0)
+  - FBSDKCoreKit/Core (5.5.0):
+    - FBSDKCoreKit/Basics
+  - FBSDKLoginKit (5.5.0):
+    - FBSDKCoreKit (~> 5.0)
   - Firebase/Core (3.11.0):
     - FirebaseAnalytics (= 3.6.0)
     - FirebaseCore (= 3.4.6)
@@ -55,57 +50,38 @@ PODS:
     - GoogleSymbolUtilities (~> 1.1)
   - Masonry (0.6.4)
   - NewRelicAgent (4.186.1)
-  - OCMock (3.3.1)
-  - OHHTTPStubs (4.8.0):
-    - OHHTTPStubs/Default (= 4.8.0)
-  - OHHTTPStubs/Core (4.8.0)
-  - OHHTTPStubs/Default (4.8.0):
-    - OHHTTPStubs/Core
-    - OHHTTPStubs/JSON
-    - OHHTTPStubs/NSURLSession
-    - OHHTTPStubs/OHPathHelpers
-  - OHHTTPStubs/JSON (4.8.0):
-    - OHHTTPStubs/Core
-  - OHHTTPStubs/NSURLSession (4.8.0):
-    - OHHTTPStubs/Core
-  - OHHTTPStubs/OHPathHelpers (4.8.0)
   - Segment-GoogleAnalytics (1.0.1):
     - Analytics (~> 3.0.0)
     - GoogleAnalytics (~> 3.14)
     - GoogleIDFASupport (~> 3.14)
   - Smartling.i18n (1.0.13)
-  - YoutubePlayer-in-WKWebView (0.3.0)
+  - YoutubePlayer-in-WKWebView (0.3.4)
 
 DEPENDENCIES:
   - Analytics (~> 3.0.0)
-  - Branch (= 0.25.5)
-  - Crashlytics (~> 3.10.1)
+  - Branch (~> 0.35.1)
+  - Crashlytics (~> 3.14.0)
   - DateTools (~> 1.6.1)
-  - Fabric (~> 1.7.6)
-  - FBSDKCoreKit (~> 4.31.1)
-  - FBSDKLoginKit (~> 4.31.1)
-  - FBSnapshotTestCase/Core (= 2.0.1)
+  - Fabric (~> 1.10.2)
+  - FBSDKCoreKit (~> 5.5.0)
+  - FBSDKLoginKit (~> 5.5.0)
   - Firebase/Core (= 3.11.0)
   - GoogleSignIn (~> 2.4)
   - Masonry (~> 0.6)
   - NewRelicAgent (~> 4.1)
-  - OCMock (~> 3.1)
-  - OHHTTPStubs (~> 4.0)
   - Segment-GoogleAnalytics (~> 1.0.0)
   - Smartling.i18n (~> 1.0)
   - YoutubePlayer-in-WKWebView (~> 0.3.0)
 
 SPEC REPOS:
-  https://github.com/cocoapods/specs.git:
+  https://github.com/CocoaPods/Specs.git:
     - Analytics
-    - Bolts
     - Branch
     - Crashlytics
     - DateTools
     - Fabric
     - FBSDKCoreKit
     - FBSDKLoginKit
-    - FBSnapshotTestCase
     - Firebase
     - FirebaseAnalytics
     - FirebaseCore
@@ -122,22 +98,18 @@ SPEC REPOS:
     - GoogleUtilities
     - Masonry
     - NewRelicAgent
-    - OCMock
-    - OHHTTPStubs
     - Segment-GoogleAnalytics
     - Smartling.i18n
     - YoutubePlayer-in-WKWebView
 
 SPEC CHECKSUMS:
   Analytics: b342fb4f43fa4f97ca6f4358b44d3295217ba294
-  Bolts: 8a7995239dbe724f9cba2248b766d48b7ebdd322
-  Branch: 848e8e908182a97678d9f5a854d10e59a40af2aa
-  Crashlytics: aee1a064cbbf99b32efa3f056a5f458d846bc8ff
+  Branch: 43863eab4c2339a58fa552f2f277139c3839dfb4
+  Crashlytics: 9220f5bc89e7a618df411b4f639389dbfb0e03d2
   DateTools: 9bcc89e4f2f9004d8a7a2bd1b49269cf78968e65
-  Fabric: f8d42c893bb187326a7968b62abe55c36a987a46
-  FBSDKCoreKit: e08ccfcefa7bc1347a07c276dac9bf6c7fe57024
-  FBSDKLoginKit: 99797ac39252fef6f72600b886f6ee60b4b29cab
-  FBSnapshotTestCase: bdb997ab2397495205f11156d4d444606daebd27
+  Fabric: ea977e3cd9c20425516d3dafd3bf8c941c51223f
+  FBSDKCoreKit: 7ade9cfea30eef2f6cf105a1aa904f89ea68fb7d
+  FBSDKLoginKit: bb28062f24e79590c44ba03297ca9bea4b6436d2
   Firebase: b8134e285eb33201115bc688bc5d7f112923bc1f
   FirebaseAnalytics: 9c67af0ebeb8d2146c9b4ea2616439affa947b58
   FirebaseCore: 03da1cb32615569bbc2830a22f9ad753d9a02ef5
@@ -154,12 +126,10 @@ SPEC CHECKSUMS:
   GoogleUtilities: 8bbc733218aad26306f9d4a253823986110e3358
   Masonry: 281802d04d787ea2973179ee8bcb50500579ede2
   NewRelicAgent: 5cd52dafe03e74c5066073a00fd500df9d966e7e
-  OCMock: f3f61e6eaa16038c30caa5798c5e49d3307b6f22
-  OHHTTPStubs: b393565822317305b87a1440d4c7aff131679f66
   Segment-GoogleAnalytics: ffea73c99196720b28b58ea93bcc0e6d11f172e1
   Smartling.i18n: 03ef7a5643965212c6ca9ed7d65385950ca4a989
-  YoutubePlayer-in-WKWebView: 17a33b2fa619d357c9ddd763942ce556660facae
+  YoutubePlayer-in-WKWebView: af2f5929fc78882d94bfdfeea999b661b78d9717
 
-PODFILE CHECKSUM: 100b3b0f8dc5838cddf4dcee46265905bcd9d123
+PODFILE CHECKSUM: 0904e0dfe5cf3bf6402e66e57742014eeafed1bc
 
-COCOAPODS: 1.5.3
+COCOAPODS: 1.9.3

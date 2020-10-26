@@ -8,9 +8,9 @@
 
 import WebKit
 
-@objc class SamlLoginViewController: UIViewController, UIWebViewDelegate {
+@objc class SamlLoginViewController: UIViewController, WKNavigationDelegate {
 
-    var webView: UIWebView!
+    var webView: WKWebView!
     var sessionCookie: HTTPCookie!
     private let loadingIndicatorView = SpinnerView(size: .Large, color: .Primary)
 
@@ -30,13 +30,13 @@ import WebKit
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        webView = UIWebView(frame: UIScreen.main.bounds)
-        webView.delegate = self
+        webView = WKWebView(frame: UIScreen.main.bounds)
+        webView.navigationDelegate = self
         view.addSubview(webView)
         let path = NSString.oex_string(withFormat: SAML_PROVIDER_URL, parameters: ["idpSlug": environment.config.samlProviderConfig.samlIdpSlug, "authEntry": authEntry])
         if let url = URL(string: (environment.config.apiHostURL()?.absoluteString)!+path) {
             let request = URLRequest(url: url)
-            webView.loadRequest(request)
+            webView.load(request)
         }
         let closeButton = UIBarButtonItem(image: UIImage(named: "ic_cancel"), style: .plain, target: self, action: #selector(navigateBack))
         navigationItem.leftBarButtonItem = closeButton
@@ -45,8 +45,8 @@ import WebKit
     @objc func navigateBack() {
         dismiss(animated: true, completion: nil)
     }
-
-    func webViewDidStartLoad(_ webView: UIWebView) {
+    
+    func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
         loadingIndicatorView.startAnimating()
         view.addSubview(loadingIndicatorView)
         loadingIndicatorView.snp.makeConstraints { make in
@@ -54,11 +54,16 @@ import WebKit
         }
         webView.isHidden = true
     }
-
-    func webViewDidFinishLoad(_ webView: UIWebView) {
-        navigationItem.title = webView.stringByEvaluatingJavaScript(from: "document.title")
+    
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        webView.evaluateJavaScript("document.title") { (response, error) in
+            if let response = response as? String {
+                self.navigationItem.title = response
+            }
+        }
+        
         loadingIndicatorView.removeFromSuperview()
-        guard let url = webView.request?.URLString else {
+        guard let url = webView.url?.URLString else {
             return
         }
         if url.contains(find: (environment.config.apiHostURL()?.absoluteString)!) {
@@ -75,7 +80,6 @@ import WebKit
         } else {
             webView.isHidden = false
         }
-
     }
 
     func handleSuccessfulLoginWithSaml(userDetails: OEXUserDetails) {

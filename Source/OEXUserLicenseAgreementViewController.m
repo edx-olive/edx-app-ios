@@ -10,12 +10,12 @@
 
 #import "edX-Swift.h"
 #import "Logger+OEXObjC.h"
-
+#import <WebKit/WebKit.h>
 #import "OEXRegistrationAgreement.h"
 
-@interface OEXUserLicenseAgreementViewController () <UIWebViewDelegate>
+@interface OEXUserLicenseAgreementViewController () <WKNavigationDelegate>
 {
-    IBOutlet UIWebView* webView;
+    IBOutlet WKWebView* webView;
     IBOutlet UIActivityIndicatorView* activityIndicator;
 }
 @property(nonatomic, strong) NSURL* contentUrl;
@@ -41,7 +41,7 @@
     // Do any additional setup after loading the view from its nib.
     [_closeButton setTitle:[Strings close] forState:UIControlStateNormal];
     NSURLRequest* request = [[NSURLRequest alloc] initWithURL:self.contentUrl];
-    webView.delegate = self;
+    webView.navigationDelegate = self;
     [webView loadRequest:request];
 }
 
@@ -49,19 +49,20 @@
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
-- (BOOL)webView:(UIWebView*)inWeb shouldStartLoadWithRequest:(NSURLRequest*)inRequest navigationType:(UIWebViewNavigationType)inType {
-    if([[inRequest URL] isFileURL]) {
-        return YES;
+- (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
+    if ([navigationAction.request.URL isFileURL]) {
+        decisionHandler(WKNavigationActionPolicyAllow);
     }
-
-    if(inType == UIWebViewNavigationTypeLinkClicked) {
-        [[UIApplication sharedApplication] openURL:[inRequest URL]];
-        return NO;
+    
+    if (navigationAction.navigationType == WKNavigationTypeLinkActivated) {
+        [[UIApplication sharedApplication] openURL:[navigationAction.request URL]];
+        decisionHandler(WKNavigationActionPolicyCancel);
     }
-    return YES;
+    
+    decisionHandler(WKNavigationActionPolicyAllow);
 }
 
-- (void)webView:(UIWebView*)webView didFailLoadWithError:(NSError*)error {
+- (void)webView:(WKWebView *)webView didFailNavigation:(WKNavigation *)navigation withError:(NSError *)error {
     [activityIndicator stopAnimating];
     OEXLogInfo(@"EULA", @"Error is %@", error.localizedDescription);
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:nil message:error.localizedDescription preferredStyle:UIAlertControllerStyleAlert];
@@ -69,13 +70,14 @@
     [self presentViewController:alert animated:YES completion:nil];
 }
 
-- (void)webViewDidFinishLoad:(UIWebView*)webView {
+- (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation {
     [activityIndicator stopAnimating];
     OEXLogInfo(@"EULA", @"Web View did finish loading");
 }
 
-- (void)webViewDidStartLoad:(UIWebView*)webView {
+- (void)webView:(WKWebView *)webView didStartProvisionalNavigation:(WKNavigation *)navigation {
     [activityIndicator startAnimating];
     OEXLogInfo(@"EULA", @"Web View did start loading");
 }
+
 @end

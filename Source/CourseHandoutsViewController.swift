@@ -7,20 +7,22 @@
 //
 
 import UIKit
-public class CourseHandoutsViewController: OfflineSupportViewController, UIWebViewDelegate, LoadStateViewReloadSupport, InterfaceOrientationOverriding {
+import WebKit
+
+public class CourseHandoutsViewController: OfflineSupportViewController, WKNavigationDelegate, LoadStateViewReloadSupport, InterfaceOrientationOverriding {
     
     public typealias Environment = DataManagerProvider & NetworkManagerProvider & ReachabilityProvider & OEXAnalyticsProvider
 
     let courseID : String
     let environment : Environment
-    let webView : UIWebView
+    let webView : WKWebView
     let loadController : LoadStateViewController
     let handouts : BackedStream<String> = BackedStream()
     
     init(environment : Environment, courseID : String) {
         self.environment = environment
         self.courseID = courseID
-        self.webView = UIWebView()
+        self.webView = WKWebView()
         self.loadController = LoadStateViewController()
         
         super.init(env: environment)
@@ -39,7 +41,7 @@ public class CourseHandoutsViewController: OfflineSupportViewController, UIWebVi
         addSubviews()
         setConstraints()
         setStyles()
-        webView.delegate = self
+        webView.navigationDelegate = self
     }
     
     public override func viewWillAppear(_ animated: Bool) {
@@ -119,21 +121,18 @@ public class CourseHandoutsViewController: OfflineSupportViewController, UIWebVi
         super.updateViewConstraints()
     }
     
-    //MARK: UIWebView delegate
-
-    public func webView(_ webView: UIWebView, shouldStartLoadWith request: URLRequest, navigationType: UIWebViewNavigationType) -> Bool {
-        if (navigationType != UIWebViewNavigationType.other) {
-            if let URL = request.url {
+    public func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        if (navigationAction.navigationType != .other) {
+            if let URL = navigationAction.request.url {
                  UIApplication.shared.openURL(URL)
-                return false
+                decisionHandler(.cancel)
             }
         }
-        return true
+        decisionHandler(.allow)
     }
     
     //MARK:- LoadStateViewReloadSupport method
     func loadStateViewReload() {
         loadHandouts()
     }
-    
 }

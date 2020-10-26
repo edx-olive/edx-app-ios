@@ -8,25 +8,25 @@ project 'edX.xcodeproj'
 target 'edX' do
 pod 'Analytics', '~> 3.0.0'
 pod 'Segment-GoogleAnalytics', '~> 1.0.0'
-pod 'Crashlytics', '~> 3.10.1'
+pod 'Crashlytics', '~> 3.14.0'
 pod 'DateTools', '~> 1.6.1'
-pod 'Fabric', '~> 1.7.6'
+pod 'Fabric', '~> 1.10.2'
 pod 'GoogleSignIn', '~> 2.4'
 pod 'Masonry', '~> 0.6'
 pod 'NewRelicAgent', '~> 4.1'
-pod 'FBSDKCoreKit', '~> 4.31.1'
-pod 'FBSDKLoginKit', '~> 4.31.1'
+pod 'FBSDKCoreKit', '~> 5.5.0'
+pod 'FBSDKLoginKit', '~> 5.5.0'
 pod 'Smartling.i18n', '~> 1.0'
 pod 'Firebase/Core', '= 3.11.0'
-pod 'Branch', '= 0.25.5'
+pod 'Branch', '~> 0.35.1'
 pod 'YoutubePlayer-in-WKWebView', '~> 0.3.0'
 end
 
-target 'edXTests' do
-    pod 'FBSnapshotTestCase/Core', '= 2.0.1'
-    pod 'OCMock', '~> 3.1'
-    pod 'OHHTTPStubs', '~> 4.0'
-end
+#target 'edXTests' do
+#    pod 'FBSnapshotTestCase/Core', '= 2.0.1'
+#    pod 'OCMock', '~> 3.1'
+#    pod 'OHHTTPStubs', '~> 4.0'
+#end
 
 post_install do |installer|
     installer.pods_project.targets.each do |target|
