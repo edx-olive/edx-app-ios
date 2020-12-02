@@ -638,7 +638,10 @@
 		BECB7B1F1924C0C3009C77F1 /* OEXAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = BECB7B1E1924C0C3009C77F1 /* OEXAppDelegate.m */; };
 		BECB7B691924EE11009C77F1 /* OEXLoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BECB7B681924EE11009C77F1 /* OEXLoginViewController.m */; };
 		BEEEBF80196AAACF00EF2C35 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = BEEEBF82196AAACF00EF2C35 /* Localizable.strings */; };
+		D8266D4C2561048000C9D755 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8266D4B2561048000C9D755 /* Extensions.swift */; };
 		D833A3BF23F85463009558ED /* Strings.swift in Sources */ = {isa = PBXBuildFile; fileRef = D833A3BE23F85463009558ED /* Strings.swift */; };
+		D86530432551344A00F13470 /* ic_next_blue@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = D86530412551344A00F13470 /* ic_next_blue@3x.png */; };
+		D86530442551344A00F13470 /* ic_next_blue.png in Resources */ = {isa = PBXBuildFile; fileRef = D86530422551344A00F13470 /* ic_next_blue.png */; };
 		E00523431CF81D9800B7F5C3 /* DiscussionBlockViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00523421CF81D9800B7F5C3 /* DiscussionBlockViewController.swift */; };
 		E01591F21D533F3B00201B15 /* UIViewController+CommonAdditions.swift in Sources */ = {isa = PBXBuildFile; fileRef = E01591F11D533F3B00201B15 /* UIViewController+CommonAdditions.swift */; };
 		E01F45671E03D04100B9D7DC /* FirebaseAnalyticsTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = E01F45661E03D04100B9D7DC /* FirebaseAnalyticsTracker.swift */; };
@@ -1640,7 +1643,10 @@
 		CBF03A4C22CEC2000041945E /* he */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = he; path = he.lproj/languages.json; sourceTree = "<group>"; };
 		CBF03A4D22CEC2010041945E /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = ar; path = ar.lproj/languages.json; sourceTree = "<group>"; };
 		D403B266ACE25A256FD75605 /* Pods-edXTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-edXTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-edXTests/Pods-edXTests.release.xcconfig"; sourceTree = "<group>"; };
+		D8266D4B2561048000C9D755 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		D833A3BE23F85463009558ED /* Strings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Strings.swift; sourceTree = "<group>"; };
+		D86530412551344A00F13470 /* ic_next_blue@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ic_next_blue@3x.png"; sourceTree = "<group>"; };
+		D86530422551344A00F13470 /* ic_next_blue.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ic_next_blue.png; sourceTree = "<group>"; };
 		E00523421CF81D9800B7F5C3 /* DiscussionBlockViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DiscussionBlockViewController.swift; sourceTree = "<group>"; };
 		E00523441CFD768700B7F5C3 /* DiscussionBlockViewControllerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DiscussionBlockViewControllerTests.swift; sourceTree = "<group>"; };
 		E008D9041CCE1506007F3643 /* DiscussionResponsesViewControllerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DiscussionResponsesViewControllerTests.swift; sourceTree = "<group>"; };
@@ -2177,6 +2183,8 @@
 				E021F46B1F739599007A26E7 /* logo@2x~ipad.png */,
 				22A4191B1EB1CF1500BBC8CA /* shareCourse.png */,
 				22A4191C1EB1CF1500BBC8CA /* shareCourse@2x.png */,
+				D86530422551344A00F13470 /* ic_next_blue.png */,
+				D86530412551344A00F13470 /* ic_next_blue@3x.png */,
 				6926CDA41D59BE3600A16E22 /* ic_next_press.png */,
 				6926CDA51D59BE3600A16E22 /* ic_next.png */,
 				6926CDA61D59BE3600A16E22 /* ic_previous_press.png */,
@@ -2933,6 +2941,7 @@
 				77691FA11B3B4596003922F2 /* UIColor+OEXHex.h */,
 				77691FA21B3B4596003922F2 /* UIColor+OEXHex.m */,
 				E02E59EE1F0E231000060AE0 /* VersionParser.swift */,
+				D8266D4B2561048000C9D755 /* Extensions.swift */,
 			);
 			name = Utils;
 			sourceTree = "<group>";
@@ -4043,6 +4052,7 @@
 				B71AA1C520CEF64D00700C5E /* food-nutrition@2x.png in Resources */,
 				B71AA1C820CEF64D00700C5E /* philosophy-ethics@2x.png in Resources */,
 				E0DB52C720A1EFF900150FF5 /* Default-Landscape-375w-667h@2x.png in Resources */,
+				D86530432551344A00F13470 /* ic_next_blue@3x.png in Resources */,
 				22A4191E1EB1CF1500BBC8CA /* shareCourse@2x.png in Resources */,
 				E021F46C1F739599007A26E7 /* loginScreenImage@2x~ipad.png in Resources */,
 				B4B6D64A1A95CF33000F44E8 /* OEXUserLicenseAgreementViewController.xib in Resources */,
@@ -4058,6 +4068,7 @@
 				E0EEC6E71F1CD279006C8D62 /* whats_new.json in Resources */,
 				69ECC64F1D50D1170030CF87 /* Default-Landscape@3x.png in Resources */,
 				B71AA1BA20CEF64D00700C5E /* energy@2x.png in Resources */,
+				D86530442551344A00F13470 /* ic_next_blue.png in Resources */,
 				B71AA1C120CEF64D00700C5E /* ethics@2x.png in Resources */,
 				B71AA1AF20CEF64D00700C5E /* health@3x.png in Resources */,
 				B71AA1CA20CEF64D00700C5E /* biology@2x.png in Resources */,
@@ -4475,6 +4486,7 @@
 				B70BD00620B57B93005F0D19 /* SubjectCollectionViewCell.swift in Sources */,
 				B4D5C7EB1A6FBAA300427D1D /* OEXAccessToken.m in Sources */,
 				7C2DD5531D4A8669006148E0 /* UserPreferenceManager.swift in Sources */,
+				D8266D4C2561048000C9D755 /* Extensions.swift in Sources */,
 				777DE71A1C1656ED0068E280 /* CourseCatalogDetailView.swift in Sources */,
 				775EB3AC1B1FC37C009526A8 /* SpinnerView.swift in Sources */,
 				B760E5562010DD6800ECACAB /* BulkDownloadHelper.swift in Sources */,
@@ -4897,7 +4909,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CONFIGURATION_BUILD_DIR = "$PODS_BUILD_DIR/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = 8ZP6MB5KZK;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -5290,7 +5302,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CONFIGURATION_BUILD_DIR = "$PODS_BUILD_DIR/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = 8ZP6MB5KZK;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -5332,7 +5344,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CONFIGURATION_BUILD_DIR = "$PODS_BUILD_DIR/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = 8ZP6MB5KZK;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (

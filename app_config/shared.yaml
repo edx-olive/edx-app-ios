@@ -3,7 +3,7 @@ API_HOST_URL: 'https://courses.campus.gov.il'
 ENVIRONMENT_DISPLAY_NAME: 'קמפוס'
 PLATFORM_NAME: 'קמפוס'
 PLATFORM_DESTINATION_NAME: 'campus.gov.il'
-FEEDBACK_EMAIL_ADDRESS: 'support@campus.com'
+FEEDBACK_EMAIL_ADDRESS: 'campus@mail.gov.il'
 OAUTH_CLIENT_ID: 'f225309cd88d9cca6e8d'
 
 # FEATURES
@@ -28,15 +28,19 @@ YOUTUBE_VIDEO:
     YOUTUBE_API_KEY: 'AIzaSyBXC2S5WuEO51J_xYJUMTduXwbd8DY0QPI'
 
 FACEBOOK:
-    ENABLED: true
-    FACEBOOK_APP_ID: '434485274045114'
+    ENABLED: false
+    FACEBOOK_APP_ID: '2313093588709761'
+
+GOOGLE:
+    ENABLED: false
+    GOOGLE_PLUS_KEY: '263393309337-ae6nftkis11iok3a4dp1240vm2qm0hbn.apps.googleusercontent.com'
 
 SAML:
-    ENABLED: true
+    ENABLED: false
     SAML_IDP_SLUG: 'moe-edu-idm'
     NAME: 'הזדהות משרד החינוך'
 
 AGREEMENT_URLS:
-    EULA_URL: 'https://campus.gov.il/tos'
-    TOS_URL: 'https://campus.gov.il/tos'
-    PRIVACY_POLICY_URL: 'https://campus.gov.il/privacy'
+    EULA_URL: 'https://campus.gov.il/privacy-policy'
+    TOS_URL: 'https://campus.gov.il/privacy-policy'
+    PRIVACY_POLICY_URL: 'https://campus.gov.il/privacy-policy'

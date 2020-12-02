@@ -50,6 +50,7 @@ class RegistrationFormFieldView: UIView {
         textField.autocapitalizationType = .none
         textField.autocorrectionType = .no
         textField.addTarget(self, action: #selector(RegistrationFormFieldView.valueDidChange), for: .editingChanged)
+        textField.addTarget(self, action: #selector(RegistrationFormFieldView.editingDidEnd), for: .editingDidEnd)
         textField.accessibilityIdentifier = "\(self.accessibilityIdPrefix)-text-input-field"
         return textField
     }()
@@ -208,6 +209,11 @@ class RegistrationFormFieldView: UIView {
     }
     
     @objc func valueDidChange() {
+        errorMessage = validate()
+//        NotificationCenter.default.post(Notification(name: Notification.Name(rawValue: NOTIFICATION_REGISTRATION_FORM_FIELD_VALUE_DID_CHANGE)))
+    }
+    
+    @objc func editingDidEnd() {
         errorMessage = validate()
         NotificationCenter.default.post(Notification(name: Notification.Name(rawValue: NOTIFICATION_REGISTRATION_FORM_FIELD_VALUE_DID_CHANGE)))
     }

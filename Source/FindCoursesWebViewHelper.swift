@@ -209,8 +209,11 @@ extension FindCoursesWebViewHelper: WKNavigationDelegate {
         
         let outsideLink = (request.mainDocumentURL?.host != self.request?.url?.host)
         if let URL = request.url, outsideLink || capturedLink {
-            UIApplication.shared.openURL(URL)
-            decisionHandler(.cancel)
+//            UIApplication.shared.openURL(URL)
+//            decisionHandler(.cancel)
+//            return
+            decisionHandler(.allow)
+            webView.load(URLRequest(url: URL))
             return
         }
         

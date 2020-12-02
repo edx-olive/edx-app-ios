@@ -191,8 +191,11 @@ class CourseCatalogDetailView : UIView, WKNavigationDelegate {
     
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         if let URL = navigationAction.request.url, navigationAction.navigationType != .other {
-            UIApplication.shared.openURL(URL)
-            decisionHandler(.cancel)
+//            UIApplication.shared.openURL(URL)
+//            decisionHandler(.cancel)
+            decisionHandler(.allow)
+            webView.load(URLRequest(url: URL))
+            return
         }
         decisionHandler(.allow)
     }

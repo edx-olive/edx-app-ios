@@ -199,8 +199,11 @@ class CourseAnnouncementsViewController: OfflineSupportViewController, WKNavigat
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         if (navigationAction.navigationType != .other) {
             if let URL = navigationAction.request.url {
-                UIApplication.shared.openURL(URL)
-                decisionHandler(.cancel)
+//                UIApplication.shared.openURL(URL)
+//                decisionHandler(.cancel)
+                decisionHandler(.allow)
+                webView.load(URLRequest(url: URL))
+                return
             }
         }
         decisionHandler(.allow)

@@ -51,7 +51,7 @@ typedef NS_ENUM(NSUInteger, OEXTextSize) {
 
 + (CGFloat)pointSizeForTextSize:(OEXTextSize)size;
 
-@property (readonly, assign, nonatomic) NSTextAlignment alignment;
+@property (assign, nonatomic) NSTextAlignment alignment;
 @property (readonly, assign, nonatomic) OEXLetterSpacing letterSpacing;
 @property (readonly, strong, nonatomic, nullable) UIColor* color;
 @property (readonly, assign, nonatomic) NSLineBreakMode lineBreakMode;

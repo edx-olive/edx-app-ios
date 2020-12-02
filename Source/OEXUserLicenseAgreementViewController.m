@@ -7,15 +7,14 @@
 //
 
 #import "OEXUserLicenseAgreementViewController.h"
-
+#import <Masonry/Masonry.h>
 #import "edX-Swift.h"
 #import "Logger+OEXObjC.h"
 #import <WebKit/WebKit.h>
 #import "OEXRegistrationAgreement.h"
-
 @interface OEXUserLicenseAgreementViewController () <WKNavigationDelegate>
 {
-    IBOutlet WKWebView* webView;
+    WKWebView *webView;
     IBOutlet UIActivityIndicatorView* activityIndicator;
 }
 @property(nonatomic, strong) NSURL* contentUrl;
@@ -38,9 +37,21 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view from its nib.
+    [self.view layoutIfNeeded];
+    
     [_closeButton setTitle:[Strings close] forState:UIControlStateNormal];
     NSURLRequest* request = [[NSURLRequest alloc] initWithURL:self.contentUrl];
+    
+    webView = [[WKWebView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height-40)];
+    [self.view addSubview:webView];
+    [webView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(self.view.mas_top).with.offset(0);
+        make.left.equalTo(self.view.mas_left).with.offset(0);
+        make.bottom.equalTo(self.closeButton.mas_top).with.offset(0);
+        make.right.equalTo(self.view.mas_right).with.offset(0);
+    }];
+    
+    
     webView.navigationDelegate = self;
     [webView loadRequest:request];
 }

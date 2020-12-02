@@ -49,11 +49,8 @@ class VideoTranscriptTableViewCell: UITableViewCell {
     }
     
     func setTranscriptText(text: String? , highlighted: Bool) {
-        if !highlighted {
-            titleLabel.attributedText = standardTitleStyle.attributedString(withText: text)
-        }
-        else{
-            titleLabel.attributedText = highlightedTitleStyle.attributedString(withText: text)
-        }
+        let style = highlighted ? highlightedTitleStyle : standardTitleStyle
+        style.alignment = text != nil ? (text!.isRTL() ? .right : .left) : .natural
+        titleLabel.attributedText = style.attributedString(withText: text)
     }
 }

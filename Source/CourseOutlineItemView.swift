@@ -87,7 +87,18 @@ public class CourseOutlineItemView: UIView {
     }
     
     func setTitleText(title : String?) {
-        titleLabel.attributedText = fontStyle.attributedString(withText: title)
+        let style = fontStyle
+        var alignment = NSTextAlignment.natural
+        if title != nil {
+            let comps = title!.components(separatedBy: " ")
+            if comps.count > 1 {
+                alignment = comps[1].isRTL() ? .right : .left
+            } else {
+                alignment = comps[0].isRTL() ? .right : .left
+            }
+        }
+        style.alignment = alignment
+        titleLabel.attributedText = style.attributedString(withText: title)
     }
     
     func formattedDueDateString(asMonthDay date: NSDate?) -> String {
@@ -103,10 +114,15 @@ public class CourseOutlineItemView: UIView {
     func getAttributedString(withBlockType type: CourseBlockType?, withText text: String) -> NSAttributedString {
         
         guard let blockType = type, case CourseBlockType.Section = blockType else {
-            return CourseOutlineItemView.detailFontStyle.attributedString(withText: text)
+            let style = CourseOutlineItemView.detailFontStyle
+            style.alignment = text.isRTL() ? .right : .left
+
+            return style.attributedString(withText: text)
         }
         
-        return boldFontStyle.attributedString(withText: text)
+        let style = boldFontStyle
+        style.alignment = text.isRTL() ? .right : .left
+        return style.attributedString(withText: text)
     }
 
     func setDetailText(title : String, dueDate: String? = "", blockType: CourseBlockType?, videoSize: String? = "") {
@@ -152,7 +168,7 @@ public class CourseOutlineItemView: UIView {
             else {
                 make.leading.equalTo(self).offset(StandardHorizontalMargin)
             }
-            make.trailing.lessThanOrEqualTo(trailingContainer.snp.leading).offset(TitleOffsetTrailing)
+            make.trailing.equalTo(self).offset(TitleOffsetTrailing)
         }
         
         super.updateConstraints()

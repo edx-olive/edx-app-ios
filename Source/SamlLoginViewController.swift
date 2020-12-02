@@ -8,7 +8,7 @@
 
 import WebKit
 
-@objc class SamlLoginViewController: UIViewController, WKNavigationDelegate {
+@objc class SamlLoginViewController: UIViewController, WKNavigationDelegate, WKUIDelegate {
 
     var webView: WKWebView!
     var sessionCookie: HTTPCookie!
@@ -32,18 +32,53 @@ import WebKit
         super.viewDidLoad()
         webView = WKWebView(frame: UIScreen.main.bounds)
         webView.navigationDelegate = self
+        webView.uiDelegate = self
         view.addSubview(webView)
         let path = NSString.oex_string(withFormat: SAML_PROVIDER_URL, parameters: ["idpSlug": environment.config.samlProviderConfig.samlIdpSlug, "authEntry": authEntry])
         if let url = URL(string: (environment.config.apiHostURL()?.absoluteString)!+path) {
             let request = URLRequest(url: url)
             webView.load(request)
         }
+        
         let closeButton = UIBarButtonItem(image: UIImage(named: "ic_cancel"), style: .plain, target: self, action: #selector(navigateBack))
         navigationItem.leftBarButtonItem = closeButton
+        
+        let backButton = UIBarButtonItem(image: UIImage(named: "ic_next_blue"), style: .plain, target: self, action: #selector(goBack))
+        navigationItem.rightBarButtonItem = backButton
+    }
+    
+    @objc func goBack() {
+        if webView.canGoBack {
+            webView.goBack()
+        }
     }
 
     @objc func navigateBack() {
         dismiss(animated: true, completion: nil)
+    }
+    
+//    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+////        switch navigationAction.navigationType {
+////        case .linkActivated, .formSubmitted, .formResubmitted:
+////            if let URL = navigationAction.request.url {
+////                UIApplication.shared.openURL(URL)
+////            }
+////            decisionHandler(.cancel)
+////        default:
+////            decisionHandler(.allow)
+////        }
+//        
+//        decisionHandler(.allow)
+//    }
+    
+    func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
+        if let frame = navigationAction.targetFrame,
+            frame.isMainFrame {
+            return nil
+        }
+        // for _blank target or non-mainFrame target
+        webView.load(navigationAction.request)
+        return nil
     }
     
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
@@ -126,7 +161,10 @@ import WebKit
                 alert.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.default, handler: {(alert: UIAlertAction) in
                     self.dismiss(animated: false, completion: nil)
                 }))
-                self.present(alert, animated: true, completion: nil)
+                DispatchQueue.main.async {
+                    self.present(alert, animated: true, completion: nil)
+                }
+                
             }
         }
     }

@@ -166,7 +166,7 @@ class CourseOutlineTableController : UITableViewController, CourseVideoTableView
     
     override func updateViewConstraints() {
         super.updateViewConstraints()
-        refreshTableHeaderView(lastAccess: lastAccess)
+        //refreshTableHeaderView(lastAccess: lastAccess)
     }
     
     override func numberOfSections(in tableView: UITableView) -> Int {
